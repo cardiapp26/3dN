@@ -1,5 +1,6 @@
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { Environment, Html, Lightformer, OrbitControls } from "@react-three/drei";
+import { isDragOrbit, recordPointerDown } from "@/lib/gesture";
 import {
   useEffect,
   useMemo,
@@ -279,7 +280,7 @@ function Organs() {
           return (
             <group key={model.id} visible={layers[model.layer]}>
               <mesh geometry={geometry} material={mats.boneDepth} renderOrder={40} />
-              <mesh geometry={geometry} material={mats.bone} renderOrder={41} />
+              <mesh geometry={geometry} material={mats.bone} renderOrder={41} onClick={(e) => e.stopPropagation()} />
             </group>
           );
         }
@@ -294,11 +295,19 @@ function Organs() {
           return (
             <group key={model.id} visible={visible}>
               <mesh geometry={geometry} material={mats.boneDepth} renderOrder={38} />
-              <mesh geometry={geometry} material={mats.brainGhost} renderOrder={39} />
+              <mesh geometry={geometry} material={mats.brainGhost} renderOrder={39} onClick={(e) => e.stopPropagation()} />
             </group>
           );
         }
-        return <mesh key={model.id} geometry={geometry} material={mats[model.material]} visible={visible} />;
+        return (
+          <mesh
+            key={model.id}
+            geometry={geometry}
+            material={mats[model.material]}
+            visible={visible}
+            onClick={(e) => e.stopPropagation()}
+          />
+        );
       })}
       <SoftOrgans geometries={geometries} bone={mats.bone} boneDepth={mats.boneDepth} />
     </group>
@@ -364,9 +373,21 @@ function SoftOrgans({
 }) {
   const layers = useStudio((s) => s.layers);
   const selected = useStudio((s) => s.selectedId);
+  const setSelected = useStudio((s) => s.setSelected);
   const explode = useStudio((s) => s.explode);
   const mode = useStudio((s) => s.mode);
   const showLabels = useStudio((s) => s.showLabels);
+
+  const handleOrganClick = (e: ThreeEvent<MouseEvent>, model: SoftModel) => {
+    e.stopPropagation();
+    if (isDragOrbit(e)) return;
+    if (model.nerveIds.length > 0) {
+      if (selected !== null && model.nerveIds.includes(selected)) {
+        return;
+      }
+      setSelected(model.nerveIds[0]);
+    }
+  };
   const mats = useMemo(() => {
     const built = new Map(
       SOFT_MODELS.filter((m) => m.material !== "bone").map((m) => [
@@ -435,7 +456,12 @@ function SoftOrgans({
                 return (
                   <group key={dir} position={position} scale={scale}>
                     <mesh geometry={geometry} material={boneDepth} renderOrder={40} />
-                    <mesh geometry={geometry} material={bone} renderOrder={41} />
+                    <mesh
+                      geometry={geometry}
+                      material={bone}
+                      renderOrder={41}
+                      onClick={(e) => handleOrganClick(e, model)}
+                    />
                   </group>
                 );
               }
@@ -444,7 +470,12 @@ function SoftOrgans({
                 return (
                   <group key={dir} position={position} scale={scale}>
                     <mesh geometry={geometry} material={lungDepth} renderOrder={50} />
-                    <mesh geometry={geometry} material={material} renderOrder={51} />
+                    <mesh
+                      geometry={geometry}
+                      material={material}
+                      renderOrder={51}
+                      onClick={(e) => handleOrganClick(e, model)}
+                    />
                   </group>
                 );
               }
@@ -456,6 +487,7 @@ function SoftOrgans({
                   material={material}
                   position={position}
                   scale={scale}
+                  onClick={(e) => handleOrganClick(e, model)}
                   onBeforeRender={
                     twitch
                       ? () => {
@@ -487,8 +519,10 @@ function Eye({ sign }: { sign: 1 | -1 }) {
   const globe = useRef<Group>(null);
   const lid = useRef<Group>(null);
   const pupil = useRef<Mesh>(null);
+  const explode = useStudio((s) => s.explode);
   const [cx, cy, cz] = EYE.center;
   const r = EYE.radius;
+  const shift = explode ? sign * EXPLODE_CM : 0;
 
   useFrame(() => {
     const pose = currentEyePose();
@@ -505,7 +539,7 @@ function Eye({ sign }: { sign: 1 | -1 }) {
   });
 
   return (
-    <group position={[cx * sign, cy, cz]}>
+    <group position={[cx * sign + shift, cy, cz]} onClick={(e) => e.stopPropagation()}>
       <group ref={globe}>
         <mesh>
           <sphereGeometry args={[r, 48, 32]} />
@@ -638,7 +672,12 @@ function BuildProgress() {
 
 export function AnatomyCanvas() {
   const controls = useRef<{ target: Vector3 } | null>(null);
-  const setSelected = useStudio((s) => s.setSelected);
+
+  useEffect(() => {
+    const onPointerDown = (e: PointerEvent) => recordPointerDown(e);
+    window.addEventListener("pointerdown", onPointerDown, { passive: true });
+    return () => window.removeEventListener("pointerdown", onPointerDown);
+  }, []);
 
   return (
     <div
@@ -652,6 +691,7 @@ export function AnatomyCanvas() {
         dpr={[1, 2]}
         camera={{ position: DEFAULT_VIEW.position, fov: 32, near: 0.5, far: 400 }}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        onPointerDown={(e) => recordPointerDown(e)}
       >
         <Lights />
         <CameraRig controls={controls} />

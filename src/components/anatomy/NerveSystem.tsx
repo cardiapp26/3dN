@@ -31,6 +31,7 @@ import {
   type Vec3,
 } from "@/lib/anatomy-paths";
 import { useStudio } from "@/lib/studio-store";
+import { isDragOrbit } from "@/lib/gesture";
 
 /** Lateral offset of each half in the split ("explode") view, cm. */
 export const EXPLODE_CM = 1.2;
@@ -232,19 +233,7 @@ type BuiltCourse = {
   hit: TubeGeometry;
   glow: TubeGeometry;
   pulse: TubeGeometry;
-  /** Latin name of this branch piece. */
-  label?: string;
-  /** Set when the piece exists on one side only. */
-  unilateral?: 1 | -1;
-  labelAt: Vector3;
 };
-
-/** Bilateral pieces are tagged once, on the authored side, unless a single side is showing. */
-function showBranchLabel(dir: 1 | -1, unilateral: 1 | -1 | undefined, view: "both" | "left" | "right"): boolean {
-  if (view !== "both") return true;
-  if (unilateral === -1) return dir === -1;
-  return dir === 1;
-}
 
 function buildNerve(path: NervePath, dir: 1 | -1, shift: number) {
   const place = (pts: Vec3[]): Vec3[] =>
@@ -284,9 +273,6 @@ function buildNerve(path: NervePath, dir: 1 | -1, shift: number) {
       hit: taperedTube(curve, Math.max(r0 * 1.5, 0.14), Math.max(r1 * 1.5, 0.14), Math.min(segments, 60), 6),
       glow: taperedTube(curve, r0 * 2.8, r1 * 2.8, segments, 12),
       pulse: taperedTube(curve, r0 * 1.4, r1 * 1.4, segments, 12),
-      label: idx === 0 ? undefined : course.label,
-      unilateral: course.side,
-      labelAt: curve.getPointAt(0.68),
     });
   });
   const total = Math.max(...courses.map((c) => c.offset + c.length));
@@ -300,7 +286,8 @@ function NerveCourse({ path, dir }: { path: NervePath; dir: 1 | -1 }) {
   const hovered = useStudio((s) => s.hoveredId);
   const explode = useStudio((s) => s.explode);
   const showLabels = useStudio((s) => s.showLabels);
-  const viewSide = useStudio((s) => s.side);
+  const side = useStudio((s) => s.side);
+  const isLabelSide = side === "left" ? dir === -1 : dir === 1;
   const setSelected = useStudio((s) => s.setSelected);
   const setHovered = useStudio((s) => s.setHovered);
   const active = selected === path.id || hovered === path.id;
@@ -342,7 +329,6 @@ function NerveCourse({ path, dir }: { path: NervePath; dir: 1 | -1 }) {
   }, [coreMat, active, dim]);
 
   const sparks = useRef<(Mesh | null)[]>([]);
-  const pointerDown = useRef<{ x: number; y: number; time: number } | null>(null);
   useFrame(() => {
     if (!signalling) return;
     const { signalProgress, playing } = useStudio.getState();
@@ -371,17 +357,9 @@ function NerveCourse({ path, dir }: { path: NervePath; dir: 1 | -1 }) {
           <mesh
             geometry={c.hit}
             material={HIT_MATERIAL}
-            onPointerDown={(e) => {
-              pointerDown.current = { x: e.clientX, y: e.clientY, time: Date.now() };
-            }}
             onClick={(e) => {
               e.stopPropagation();
-              if (pointerDown.current) {
-                const dist = Math.hypot(e.clientX - pointerDown.current.x, e.clientY - pointerDown.current.y);
-                const dt = Date.now() - pointerDown.current.time;
-                // If dragged more than 6px or held for > 350ms, this is an orbit rotation, not a click!
-                if (dist > 6 || dt > 350) return;
-              }
+              if (isDragOrbit(e)) return;
               setSelected(selected === path.id ? null : path.id);
             }}
             onPointerOver={(e) => {
@@ -407,16 +385,9 @@ function NerveCourse({ path, dir }: { path: NervePath; dir: 1 | -1 }) {
               <meshBasicMaterial color="#fffaf0" toneMapped={false} />
             </mesh>
           )}
-          {showLabels && active && c.label && showBranchLabel(dir, c.unilateral, viewSide) && (
-            <Html position={c.labelAt} center distanceFactor={16} occlude={false} zIndexRange={[4, 0]}>
-              <div className="nerve-chip nerve-chip-branch">
-                <span>{c.label}</span>
-              </div>
-            </Html>
-          )}
         </group>
       ))}
-      {showLabels && active && dir === 1 && (
+      {showLabels && active && isLabelSide && (
         <Html position={built.labelAt} center distanceFactor={18} occlude={false} zIndexRange={[5, 0]}>
           <div className="nerve-chip">
             CN {nerve.roman} <span style={{ fontStyle: "italic", textTransform: "none" }}>{nerve.nameLa}</span>
