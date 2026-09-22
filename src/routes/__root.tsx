@@ -15,7 +15,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Kafa çiftleri ve nörolojik innervasyon stüdyosu — 3D sinir yolları, kas ve organlar, atlas ve MR/BT kesitleri.",
+          "Kafa çiftleri ve nörolojik innervasyon stüdyosu: 3D sinir yolları, kas ve organlar, atlas ve MR/BT kesitleri.",
       },
     ],
     links: [

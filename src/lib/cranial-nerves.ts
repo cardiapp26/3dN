@@ -71,7 +71,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       lesion: "Anosmi, hiposmi; kafa tabanı kırığında BOS rinore ile birlikte olabilir.",
       pearl: "Foster Kennedy: ipsilateral anosmi + optik atrofi, karşı papil ödem (olfaktör oluk meningiomu).",
     },
-    mnemonicHint: "On — koku, beynin en ön çifti",
+    mnemonicHint: "On: koku, beynin en ön çifti",
     atlas: "/atlas/overview.jpg",
   },
   {
@@ -90,7 +90,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     ],
     nuclei: [
       { name: "Corpus geniculatum laterale", location: "Talamus" },
-      { name: "Pretektal çekirdekler", location: "Orta beyin — pupilla refleksi" },
+      { name: "Pretektal çekirdekler", location: "Orta beyin, pupilla refleksi" },
     ],
     origin: "Retina ganglion hücre tabakası",
     foramen: "Canalis opticus (os sphenoidale)",
@@ -105,7 +105,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       lesion: "Sinir: ipsilateral körlük. Kiazma: bitemporal hemianopsi. Traktus: homonim hemianopsi.",
       pearl: "Pitüiter adenom klasikle bitemporal hemianopsi yapar.",
     },
-    mnemonicHint: "Old — görme",
+    mnemonicHint: "Old: görme",
     atlas: "/atlas/extraocular.jpg",
   },
   {
@@ -124,7 +124,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     ],
     nuclei: [
       { name: "Nucleus nervi oculomotorii", location: "Mezensefalon, colliculus superior hizası" },
-      { name: "Edinger–Westphal", location: "Aynı düzey, parasempatik" },
+      { name: "Edinger-Westphal", location: "Aynı düzey, parasempatik" },
     ],
     origin: "Fossa interpeduncularis (orta beyin ventrali)",
     foramen: "Fissura orbitalis superior",
@@ -145,7 +145,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       lesion: "Aşağı-dışa bakış, ptozis, midriyazis. Kompresyonda önce pupil (yüzeyel parasempatik lifler).",
       pearl: "PCOM anevrizması ağrılı pupil-tutulumlu III. sinir felci yapabilir. 'Down and out'.",
     },
-    mnemonicHint: "Olympus — LR6 SO4 geri kalanı 3",
+    mnemonicHint: "Olympus: LR6 SO4, geri kalanı 3",
     atlas: "/atlas/extraocular.jpg",
   },
   {
@@ -159,7 +159,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     color: "#8b9e6b",
     functionShort: "Superior oblik",
     functions: [
-      "Tek kas: m. obliquus superior — depresyon, intorsiyon, abdüksiyon.",
+      "Tek kas: m. obliquus superior (depresyon, intorsiyon, abdüksiyon).",
       "Tek dorsal çıkan ve tamamen çaprazlaşan kafa çiftidir.",
     ],
     nuclei: [{ name: "Nucleus nervi trochlearis", location: "Mezensefalon, colliculus inferior hizası" }],
@@ -174,9 +174,9 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     clinical: {
       test: "Baş eğme (Bielschowsky), aşağı-içe bakışta diplopi.",
       lesion: "Etkilenen tarafa başı eğememe; merdiven inerken diplopi. Kompansatuar baş eğme karşı tarafa.",
-      pearl: "Kafa travmasında en sık yaralanan kafa çiftidir — uzun ve ince seyir.",
+      pearl: "Kafa travmasında en sık yaralanan kafa çiftidir; uzun ve ince seyir.",
     },
-    mnemonicHint: "Towering — SO4",
+    mnemonicHint: "Towering: SO4",
     atlas: "/atlas/extraocular.jpg",
   },
   {
@@ -194,9 +194,9 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       "Çiğneme kasları, mylohyoid, digastricus ön karın, tensor tympani, tensor veli palatini.",
     ],
     nuclei: [
-      { name: "Nucleus mesencephalicus", location: "Mezensefalon — propriosepsiyon" },
-      { name: "Nucleus principalis", location: "Pons — dokunma" },
-      { name: "Nucleus spinalis", location: "Pons–servikal — ağrı/ısı" },
+      { name: "Nucleus mesencephalicus", location: "Mezensefalon, propriosepsiyon" },
+      { name: "Nucleus principalis", location: "Pons, dokunma" },
+      { name: "Nucleus spinalis", location: "Pons-servikal, ağrı/ısı" },
       { name: "Nucleus motorius n. V", location: "Üst pons" },
     ],
     origin: "Ponsun anterolateral yüzü (orta serebellar pedinkül önü)",
@@ -222,7 +222,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       lesion: "Trigeminal nevralji (çoğunlukla V2/V3). Kornea refleksi kaybı. Çene felç tarafına sapar.",
       pearl: "Kornea refleksi: afferent V1, efferent VII.",
     },
-    mnemonicHint: "Top — diş hekiminin siniri",
+    mnemonicHint: "Top: diş hekiminin siniri",
     atlas: "/atlas/trigeminal.jpg",
   },
   {
@@ -235,7 +235,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     type: "motor",
     color: "#6a9aa0",
     functionShort: "Lateral rektus",
-    functions: ["Tek kas: m. rectus lateralis — gözü abdüksiyona götürür."],
+    functions: ["Tek kas: m. rectus lateralis; gözü abdüksiyona götürür."],
     nuclei: [{ name: "Nucleus nervi abducentis", location: "Pons altı, 4. ventrikül tabanı (colliculus facialis)" }],
     origin: "Pontomedüller birleşim, piramitlerin lateralinde",
     foramen: "Fissura orbitalis superior",
@@ -248,9 +248,9 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     clinical: {
       test: "Lateral bakış; horizontal diplopi uzak mesafede artar.",
       lesion: "İç şaşılık (ezotropya), horizontal diplopi. Kafa içi basınç artışında yalancı lokalize edici belirti olabilir.",
-      pearl: "LR6 SO4 — lateral rektus 6, superior oblik 4, geri kalan ekstraoküler kaslar 3.",
+      pearl: "LR6 SO4: lateral rektus 6, superior oblik 4, geri kalan ekstraoküler kaslar 3.",
     },
-    mnemonicHint: "A — LR6",
+    mnemonicHint: "A: LR6",
     atlas: "/atlas/extraocular.jpg",
   },
   {
@@ -270,7 +270,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     ],
     nuclei: [
       { name: "Nucleus nervi facialis", location: "Alt pons tegmentumu" },
-      { name: "Nucleus salivatorius superior", location: "Pons — parasempatik" },
+      { name: "Nucleus salivatorius superior", location: "Pons, parasempatik" },
       { name: "Nucleus solitarius (rostral)", location: "Tat" },
       { name: "Nucleus spinalis n. V", location: "Kulak çevresi somatik duyu" },
     ],
@@ -300,7 +300,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       lesion: "Üst motor: alın korunur (bilateral innervasyon). Alt motor (Bell): tüm hemifasiyal felç. Ramsay Hunt: VZV + vezikül.",
       pearl: "Bell felcinde alın tutulur; inmede alın genellikle korunur.",
     },
-    mnemonicHint: "Finn — To Zanzibar By Motor Car",
+    mnemonicHint: "Finn: To Zanzibar By Motor Car",
     atlas: "/atlas/facial.jpg",
   },
   {
@@ -331,11 +331,11 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       { id: "vest", nameTr: "Yarım daire kanalları, utrikulus, sakkulus", nameLa: "Labyrinthus vestibularis", kind: "sense", fiber: "special-sense" },
     ],
     clinical: {
-      test: "Fısıltı, Weber–Rinne, nistagmus, head-impulse, Dix–Hallpike.",
+      test: "Fısıltı, Weber-Rinne, nistagmus, head-impulse, Dix-Hallpike.",
       lesion: "Sensorinöral işitme kaybı, tinnitus, vertigo. CPA'da akustik nörinom (vestibüler şvannom) VII ile birlikte.",
       pearl: "Weber: sensorinöralde sağlam tarafa, iletimde hasta tarafa lateralize olur.",
     },
-    mnemonicHint: "And — işitme / denge",
+    mnemonicHint: "And: işitme / denge",
     atlas: "/atlas/brainstem.jpg",
   },
   {
@@ -355,7 +355,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       "Karotis sinüs / cisim baro- ve kemoreseptör afferentleri.",
     ],
     nuclei: [
-      { name: "Nucleus ambiguus", location: "Medulla — branchiomotor" },
+      { name: "Nucleus ambiguus", location: "Medulla, branchiomotor" },
       { name: "Nucleus salivatorius inferior", location: "Parotis" },
       { name: "Nucleus solitarius", location: "Tat ve viseral duyu" },
       { name: "Nucleus spinalis n. V", location: "Somatik duyu" },
@@ -375,7 +375,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       lesion: "Gag kaybı, disfaji, parotis salgısı azalması. Glossofaringeal nevralji: yutkunmayla bıçak saplanır gibi ağrı.",
       pearl: "Gag: afferent IX, efferent X.",
     },
-    mnemonicHint: "German — yutak ve parotis",
+    mnemonicHint: "German: yutak ve parotis",
     atlas: "/atlas/brainstem.jpg",
   },
   {
@@ -394,8 +394,8 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       "Dış kulak, epiglot tat, aortik arkus baroreseptörleri.",
     ],
     nuclei: [
-      { name: "Nucleus ambiguus", location: "Medulla — larinks/farinks motor" },
-      { name: "Nucleus dorsalis nervi vagi", location: "Medulla — parasempatik" },
+      { name: "Nucleus ambiguus", location: "Medulla, larinks/farinks motor" },
+      { name: "Nucleus dorsalis nervi vagi", location: "Medulla, parasempatik" },
       { name: "Nucleus solitarius", location: "Viseral duyu ve tat" },
       { name: "Nucleus spinalis n. V", location: "Aurikula duyusu" },
     ],
@@ -422,7 +422,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       lesion: "Uvula sağlam tarafa sapar. Rekürren laringeal: tek taraflı vokal kord felci, ses kısıklığı. Bilateral: stridor.",
       pearl: "En uzun kafa çifti; tek kafa çifti olarak baş-boyun ötesine iner.",
     },
-    mnemonicHint: "Viewed — gezer",
+    mnemonicHint: "Viewed: gezer",
     atlas: "/atlas/vagus.jpg",
   },
   {
@@ -457,7 +457,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       lesion: "Omuz düşüklüğü, skapula alata (hafif), başı lezyon tarafına çevirmede güçsüzlük. Posterior üçgen lenf bezi diseksiyonunda risk.",
       pearl: "SCM testi karşı tarafa rotasyon yaptırır.",
     },
-    mnemonicHint: "Some — omuz ve boyun",
+    mnemonicHint: "Some: omuz ve boyun",
     atlas: "/atlas/accessory.jpg",
   },
   {
@@ -471,7 +471,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     color: "#a09070",
     functionShort: "Dil kasları",
     functions: [
-      "Dilin tüm intrinsik kasları ve ekstrinsik kasların çoğu (palatoglossus hariç — X).",
+      "Dilin tüm intrinsik kasları ve ekstrinsik kasların çoğu (palatoglossus hariç, o CN X).",
       "Genioglossus lezyon lateralizasyonunun anahtarıdır.",
     ],
     nuclei: [{ name: "Nucleus nervi hypoglossi", location: "Medulla, 4. ventrikül tabanı (trigonum n. XII)" }],
@@ -491,7 +491,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       lesion: "Dil felç tarafına sapar ('yalanı felç tarafına söyler'). ÜMN: karşı taraf, atrofisiz; AMN: ipsilateral atrofi + fasikülasyon.",
       pearl: "Palatoglossus vagus, diğer dil kasları hipoglossal.",
     },
-    mnemonicHint: "Hops — dilaltı",
+    mnemonicHint: "Hops: dilaltı",
     atlas: "/atlas/hypoglossal.jpg",
   },
 ];
@@ -500,20 +500,220 @@ export const MNEMONIC = {
   names: "On Old Olympus' Towering Top, A Finn And German Viewed Some Hops",
   namesTr: "Özel Okulda Oturan Tarkan Abidin Fena Ağladı; Gece Vakti Saat Onikide",
   types: "Some Say Money Matters, But My Brother Says Big Brains Matter More",
-  extraocular: "LR6 SO4 — geri kalan ekstraoküler kaslar CN III",
+  extraocular: "LR6 SO4; geri kalan ekstraoküler kaslar CN III",
 };
 
-export const ATLAS_PLATES = [
-  { src: "/atlas/overview.jpg", title: "Kafa çiftleri — alt yüz", nerveIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
-  { src: "/atlas/brainstem.jpg", title: "Beyin sapı kökleri", nerveIds: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
-  { src: "/atlas/skull-base.jpg", title: "Kafa tabanı delikleri", nerveIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
-  { src: "/atlas/sagittal.jpg", title: "Median sagital kesit", nerveIds: [1, 2, 10, 12] },
-  { src: "/atlas/extraocular.jpg", title: "Ekstraoküler kaslar", nerveIds: [2, 3, 4, 6] },
-  { src: "/atlas/trigeminal.jpg", title: "N. trigeminus", nerveIds: [5] },
-  { src: "/atlas/facial.jpg", title: "N. facialis ve mimik kasları", nerveIds: [7] },
-  { src: "/atlas/vagus.jpg", title: "N. vagus ve visera", nerveIds: [10] },
-  { src: "/atlas/accessory.jpg", title: "N. accessorius", nerveIds: [11] },
-  { src: "/atlas/hypoglossal.jpg", title: "N. hypoglossus ve dil", nerveIds: [12] },
+export type AtlasPlate = {
+  id: string;
+  src: string;
+  title: string;
+  latinTitle: string;
+  orientation: "landscape" | "portrait";
+  nerveIds: readonly number[];
+  description: string;
+  structures: readonly string[];
+};
+
+export const ATLAS_PLATES: readonly AtlasPlate[] = [
+  {
+    id: "overview",
+    src: "/atlas/overview.jpg",
+    title: "Kafa çiftleri: alt yüz",
+    latinTitle: "Basis encephali et nervi craniales",
+    orientation: "landscape",
+    nerveIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    description:
+      "Beyin tabanının inferior bakışı; bulbus olfactorius'tan nervus hypoglossus'a kadar on iki kranial sinirin çıkış ve seyir topografisi.",
+    structures: [
+      "Bulbus olfactorius (CN I)",
+      "Chiasma opticum (CN II)",
+      "Fossa interpeduncularis (CN III)",
+      "N. trochlearis (CN IV)",
+      "N. trigeminus (CN V)",
+      "Sulcus bulbopontinus (CN VI, VII, VIII)",
+      "Sulcus retroolivaris (CN IX, X, XI)",
+      "Sulcus preolivaris (CN XII)",
+    ],
+  },
+  {
+    id: "brainstem",
+    src: "/atlas/brainstem.jpg",
+    title: "Beyin sapı kökleri ve kesiti",
+    latinTitle: "Truncus encephali et arbor vitae",
+    orientation: "portrait",
+    nerveIds: [3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    description:
+      "Mezensefalon, pons ve medulla oblongata anatomisi; serebellumun parasagital arbor vitae kesiti ve beyin sapı kranial sinir kök çıkışları.",
+    structures: [
+      "Colliculus superior et inferior",
+      "Pons ve pedunculus cerebellaris",
+      "Medulla oblongata ve oliva",
+      "Arbor vitae cerebelli",
+      "Fissura mediana anterior",
+    ],
+  },
+  {
+    id: "skull-base",
+    src: "/atlas/skull-base.jpg",
+    title: "Kafa tabanı iç yüzü ve delikleri",
+    latinTitle: "Basis cranii interna et foramina",
+    orientation: "landscape",
+    nerveIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    description:
+      "Fossa cranii anterior, media ve posterior; kafa çiftlerinin kafatasını terk ettiği kanal, yarık ve foramenlerin anatomik izdüşümü.",
+    structures: [
+      "Lamina cribrosa (CN I)",
+      "Canalis opticus (CN II)",
+      "Fissura orbitalis superior (CN III, IV, V1, VI)",
+      "Foramen rotundum (CN V2)",
+      "Foramen ovale (CN V3)",
+      "Porus acusticus internus (CN VII, VIII)",
+      "Foramen jugulare (CN IX, X, XI)",
+      "Canalis hypoglossi (CN XII)",
+      "Foramen magnum",
+    ],
+  },
+  {
+    id: "sagittal",
+    src: "/atlas/sagittal.jpg",
+    title: "Median sagital kafa ve boyun kesiti",
+    latinTitle: "Sectio sagittalis mediana capitis",
+    orientation: "portrait",
+    nerveIds: [1, 2, 10, 12],
+    description:
+      "Beyin orta hat yapıları (korpus kallozum, ventriküller, hipofiz), nazofarenks, orofarenks, dil ve servikal omurga aksı.",
+    structures: [
+      "Corpus callosum",
+      "Ventriculus tertius et quartus",
+      "Glandula pituitaria (Hipofiz)",
+      "Cavitas nasi ve lamina cribrosa",
+      "Lingua ve kasları",
+      "Larynx ve trachea",
+    ],
+  },
+  {
+    id: "extraocular",
+    src: "/atlas/extraocular.jpg",
+    title: "Orbita ve ekstraoküler kaslar",
+    latinTitle: "Musculi bulbi et nervi orbitales",
+    orientation: "landscape",
+    nerveIds: [2, 3, 4, 6],
+    description:
+      "Göz küresi, rektus ve oblik kaslar; CN III, IV ve VI motor innervasyonu, CN II optik sinir kılıfı ve ganglion ciliare.",
+    structures: [
+      "M. rectus superior, inferior, medialis (CN III)",
+      "M. levator palpebrae superioris (CN III)",
+      "M. obliquus superior ve trochlea (CN IV)",
+      "M. rectus lateralis (CN VI)",
+      "N. opticus (CN II)",
+      "Ggl. ciliare",
+    ],
+  },
+  {
+    id: "trigeminal",
+    src: "/atlas/trigeminal.jpg",
+    title: "N. trigeminus dalları ve yüz duyusu",
+    latinTitle: "Nervus trigeminus et rami faciales",
+    orientation: "landscape",
+    nerveIds: [5],
+    description:
+      "Trigeminal sinirin V1 (oftalmik), V2 (maksiller) ve V3 (mandibuler) üç ana bölümü; yüzün duyusal innervasyonu ve çiğneme kasları.",
+    structures: [
+      "N. ophthalmicus (V1) - supratrochlearis / supraorbitalis",
+      "N. maxillaris (V2) - infraorbitalis",
+      "N. mandibularis (V3) - mentalis / auriculotemporalis",
+      "M. masseter",
+      "M. temporalis",
+    ],
+  },
+  {
+    id: "facial",
+    src: "/atlas/facial.jpg",
+    title: "N. facialis ve mimik kasları",
+    latinTitle: "Nervus facialis et musculi faciei",
+    orientation: "landscape",
+    nerveIds: [7],
+    description:
+      "Foramen stylomastoideum'dan çıkış, glandula parotidea içindeki plexus intraparotideus (kaz ayağı - pes anserinus) ve temporal, zigomatik, bukkal, marginal mandibular, servikal dallar.",
+    structures: [
+      "Plexus intraparotideus (Pes anserinus)",
+      "Rami temporales, zygomatici, buccales",
+      "Ramus marginalis mandibulae",
+      "Ramus colli",
+      "Glandula parotidea",
+      "M. orbicularis oculi et oris",
+    ],
+  },
+  {
+    id: "vagus",
+    src: "/atlas/vagus.jpg",
+    title: "N. vagus ve parasempatik viseral yol",
+    latinTitle: "Nervus vagus et viscera",
+    orientation: "portrait",
+    nerveIds: [10],
+    description:
+      "Vagus sinirinin foramen jugulare'den başlayıp boyunda karotis kılıfı içinde seyrederek kalp, akciğer pleksusları ve mide/bağırsak parasempatik pleksuslarına uzanışı.",
+    structures: [
+      "N. vagus (vagina carotica içinde)",
+      "N. laryngeus recurrens",
+      "Plexus cardiacus (kalp innervasyonu)",
+      "Plexus pulmonalis (bronşlar)",
+      "Truncus vagalis anterior et posterior (mide/GIS)",
+    ],
+  },
+  {
+    id: "accessory",
+    src: "/atlas/accessory.jpg",
+    title: "N. accessorius ve boyun kasları",
+    latinTitle: "Nervus accessorius et musculi colli",
+    orientation: "landscape",
+    nerveIds: [11],
+    description:
+      "N. accessorius'un kranial ve spinal kökleri; trigonum cervicale posterius'tan geçerek m. sternocleidomastoideus ve m. trapezius'a motor dallar vermesi.",
+    structures: [
+      "Radix spinalis n. accessorii",
+      "M. sternocleidomastoideus innervasyonu",
+      "Trigonum colli posterius seyri",
+      "M. trapezius innervasyonu",
+    ],
+  },
+  {
+    id: "hypoglossal",
+    src: "/atlas/hypoglossal.jpg",
+    title: "N. hypoglossus ve dil anatomisi",
+    latinTitle: "Nervus hypoglossus et lingua",
+    orientation: "landscape",
+    nerveIds: [12],
+    description:
+      "Canalis hypoglossi'den çıkan CN XII'nin trigonum caroticum ve submandibulare'den geçerek dilin intrensek ve ekstrensek kaslarına dağılımı.",
+    structures: [
+      "M. genioglossus",
+      "M. hyoglossus",
+      "M. styloglossus",
+      "Musculi intrinseci linguae",
+      "Ansa cervicalis ile ilişkisi",
+    ],
+  },
+  {
+    id: "medulla-spinalis",
+    src: "/atlas/medulla-spinalis.jpg",
+    title: "Medulla spinalis ve servikal kökler",
+    latinTitle: "Medulla spinalis et radices cervicales",
+    orientation: "portrait",
+    nerveIds: [11],
+    description:
+      "Cervical medulla spinalis (omurilik) anatomisi; intumescentia cervicalis, ön/arka sinir kökleri, spinal gangliyonlar ve foramen magnum'dan kranial kaviteye yükselen N. accessorius spinal kökleri (CN XI).",
+    structures: [
+      "Fissura mediana anterior",
+      "Sulcus medianus posterior",
+      "Intumescentia cervicalis",
+      "Radices anteriores et posteriores (C1-C8)",
+      "Ganglia sensoria nervorum spinalium",
+      "Radix spinalis nervi accessorii (CN XI)",
+      "Substantia grisea (H-şekilli kelebek kesiti)",
+      "Canalis centralis",
+    ],
+  },
 ] as const;
 
 export function nerveById(id: number) {

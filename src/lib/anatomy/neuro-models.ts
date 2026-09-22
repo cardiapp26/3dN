@@ -31,6 +31,7 @@ import {
   type MeshData,
   type Sdf,
   type Shape,
+  type CsgOp,
   type Vec3,
 } from "./sdf.ts";
 
@@ -572,6 +573,62 @@ export function cerebellumSdf(): { sdf: Sdf; coarse: Sdf } {
 }
 
 /* ------------------------------------------------------------------ */
+/* Medulla Spinalis (Spinal Cord C1-C7)                               */
+/* ------------------------------------------------------------------ */
+
+export function medullaSpinalisSdf(): Sdf {
+  // Spinal canal trajectory through cervical spine C2 (y=-5.9) down to C7 (y=-15.0)
+  const cordZ = (y: number) => -1.85 - ((-5.9 - y) / 9.1) * 0.68;
+
+  // Cervical enlargement profile (intumescentia cervicalis): widest around C5-C6 (y ~ -10.5)
+  const cordRx = (y: number) => {
+    const bulge = Math.exp(-((y + 10.5) ** 2) / 8.0) * 0.18;
+    return 0.58 + bulge;
+  };
+  const cordRz = (y: number) => {
+    const bulge = Math.exp(-((y + 10.5) ** 2) / 8.0) * 0.10;
+    return 0.46 + bulge;
+  };
+
+  const cordCore: Sdf = (x, y, z) => {
+    const z0 = cordZ(y);
+    const rx = cordRx(y);
+    const rz = cordRz(y);
+    const u = x / rx;
+    const v = (z - z0) / rz;
+    const ellipseDist = (Math.sqrt(u * u + v * v) - 1.0) * Math.min(rx, rz);
+    // Bound cord from y = -6.0 down to y = -15.6
+    return smax(smax(ellipseDist, -15.6 - y, 0.35), y - (-6.0), 0.3);
+  };
+
+  // Cervical nerve rootlets (Radices cervicales C2 - C7) branching off anterolaterally & posterolaterally
+  const ops: CsgOp[] = [];
+  const rootLevels = [-6.8, -8.6, -10.4, -12.2, -14.0];
+  for (const ry of rootLevels) {
+    const rz = cordZ(ry);
+    // Ventral rootlet
+    ops.push(["+", roundCone([0.45, ry, rz + 0.25], [1.35, ry - 0.2, rz + 0.15], 0.11, 0.08), 0.15]);
+    // Dorsal rootlet & ganglion
+    ops.push(["+", roundCone([0.4, ry, rz - 0.28], [1.35, ry - 0.2, rz - 0.05], 0.11, 0.09), 0.15]);
+    // Spinal ganglion swelling
+    ops.push(["+", ellipsoid([1.45, ry - 0.2, rz], [0.18, 0.26, 0.16]), 0.12]);
+  }
+
+  // Anterior median fissure
+  const anteriorFissure = capsule([0, -6.1, cordZ(-6.1) + cordRz(-6.1)], [0, -15.5, cordZ(-15.5) + cordRz(-15.5)], 0.06);
+
+  // Posterior median sulcus
+  const posteriorSulcus = capsule([0, -6.1, cordZ(-6.1) - cordRz(-6.1)], [0, -15.5, cordZ(-15.5) - cordRz(-15.5)], 0.05);
+
+  ops.push(["-", anteriorFissure, 0.04]);
+  ops.push(["-", posteriorSulcus, 0.03]);
+
+  const cordWithRoots = csg(cordCore, ops);
+
+  return mirrorX(cordWithRoots);
+}
+
+/* ------------------------------------------------------------------ */
 /* Registry                                                            */
 /* ------------------------------------------------------------------ */
 
@@ -582,6 +639,13 @@ export const NEURO_MODELS: OrganModel[] = [
     material: "stem",
     grid: { min: [-2.95, -6.3, -3.45], max: [2.95, 6.6, 1.95], cell: 0.055, lipschitz: 1.4 },
     build: () => ({ sdf: brainstemSdf() }),
+  },
+  {
+    id: "medulla-spinalis",
+    layer: "brainstem",
+    material: "stem",
+    grid: { min: [-2.1, -16.0, -3.6], max: [2.1, -5.8, -0.6], cell: 0.065, lipschitz: 1.4 },
+    build: () => ({ sdf: medullaSpinalisSdf() }),
   },
   {
     id: "skull",

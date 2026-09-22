@@ -70,13 +70,16 @@ export function Studio() {
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden bg-bg text-fg">
       <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border px-3 md:px-5">
-        <div className="min-w-0">
-          <p className="font-display text-lg leading-none text-fg">Cranialis</p>
-          <p className="hidden truncate text-xs uppercase tracking-[0.16em] text-muted sm:block">
-            Kafa çiftleri stüdyosu
+        <div className="flex min-w-0 items-baseline gap-3">
+          <p className="latin text-2xl leading-none text-fg">
+            Cranialis<span className="text-gold">.</span>
           </p>
+          <p className="eyebrow hidden truncate sm:block">Atlas nervorum cranialium</p>
         </div>
-        <nav className="scroll-thin ml-auto flex min-w-0 gap-1 overflow-x-auto">
+        <nav
+          aria-label="Modlar"
+          className="scroll-thin ml-auto flex min-w-0 gap-0.5 overflow-x-auto rounded-full bg-surface p-1 shadow-[var(--shadow-border)]"
+        >
           {MODES.map((m) => {
             const Icon = m.icon;
             const active = mode === m.id;
@@ -84,7 +87,8 @@ export function Studio() {
               <Button
                 key={m.id}
                 size="sm"
-                variant={active ? "default" : "ghost"}
+                variant="ghost"
+                aria-pressed={active}
                 onClick={() => {
                   setMode(m.id);
                   if (m.id === "signal") useStudio.getState().setPlaying(true);
@@ -94,9 +98,9 @@ export function Studio() {
                     if (!s.layers.organs) s.toggleLayer("organs");
                   }
                 }}
-                className="shrink-0"
+                className={cn("shrink-0 rounded-full", active && "bg-surface-2 text-fg")}
               >
-                <Icon className="size-3.5" />
+                <Icon className={cn("size-3.5", active && "text-gold")} />
                 <span className="hidden md:inline">{m.label}</span>
               </Button>
             );
@@ -115,7 +119,7 @@ export function Studio() {
               <AnatomyViewport />
               <div className="studio-vignette absolute inset-0" />
               <LayerDock />
-              <p className="pointer-events-none absolute bottom-3 left-3 text-xs uppercase tracking-[0.16em] text-muted">
+              <p className="eyebrow pointer-events-none absolute bottom-3 left-3">
                 Sürükleyerek döndür · kaydırarak yaklaş
               </p>
             </>
@@ -155,30 +159,36 @@ function LayerDock() {
 
   return (
     <div className="absolute right-3 top-3 z-10 flex max-w-full flex-col items-end gap-2">
-      <div className="flex flex-wrap justify-end gap-1 rounded-lg bg-surface/90 p-1 shadow-[var(--shadow-border)] backdrop-blur-sm">
+      <div className="flex flex-wrap justify-end gap-0.5 rounded-xl bg-surface/80 p-1 shadow-[var(--shadow-border)] backdrop-blur-md">
         {LAYERS.map((l) => (
           <button
             key={l.id}
             type="button"
+            aria-pressed={layers[l.id]}
             onClick={() => toggle(l.id)}
             className={cn(
-              "rounded-md px-2 py-1 text-xs",
-              layers[l.id] ? "bg-surface-2 text-fg" : "text-muted",
+              "flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs transition-colors duration-[var(--motion-quick)]",
+              layers[l.id] ? "bg-surface-2 text-fg" : "text-muted hover:text-fg",
             )}
           >
+            <span
+              aria-hidden
+              className={cn("size-1.5 rounded-full", layers[l.id] ? "bg-gold" : "bg-subtle/50")}
+            />
             {l.label}
           </button>
         ))}
       </div>
-      <div className="flex gap-1 rounded-lg bg-surface/90 p-1 shadow-[var(--shadow-border)]">
+      <div className="flex gap-0.5 rounded-xl bg-surface/80 p-1 shadow-[var(--shadow-border)] backdrop-blur-md">
         {(["both", "right", "left"] as const).map((s) => (
           <button
             key={s}
             type="button"
             onClick={() => setSide(s)}
+            aria-pressed={side === s}
             className={cn(
-              "rounded-md px-2 py-1 text-xs",
-              side === s ? "bg-surface-2 text-fg" : "text-muted",
+              "rounded-lg px-2.5 py-1 text-xs transition-colors duration-[var(--motion-quick)]",
+              side === s ? "bg-surface-2 text-fg" : "text-muted hover:text-fg",
             )}
           >
             {s === "both" ? "Çift" : s === "right" ? "Sağ" : "Sol"}
@@ -187,7 +197,8 @@ function LayerDock() {
         <button
           type="button"
           onClick={() => setExplode(!explode)}
-          className={cn("rounded-md px-2 py-1 text-xs", explode ? "text-fg" : "text-muted")}
+          aria-pressed={explode}
+          className={cn("rounded-lg px-2 py-1 text-xs", explode ? "text-gold" : "text-muted hover:text-fg")}
           aria-label="Ayır"
         >
           <SplitSquareHorizontal className="size-3.5" />
@@ -195,7 +206,8 @@ function LayerDock() {
         <button
           type="button"
           onClick={() => setLabels(!labels)}
-          className={cn("rounded-md px-2 py-1 text-xs", labels ? "text-fg" : "text-muted")}
+          aria-pressed={labels}
+          className={cn("rounded-lg px-2 py-1 text-xs", labels ? "text-gold" : "text-muted hover:text-fg")}
           aria-label="Etiketler"
         >
           <Layers className="size-3.5" />
@@ -207,9 +219,10 @@ function LayerDock() {
 
 function MnemonicCard() {
   return (
-    <aside className="flex h-full flex-col justify-end gap-3 p-5">
-      <p className="text-xs uppercase tracking-[0.16em] text-subtle">Anımsatıcı</p>
-      <p className="font-display text-lg leading-snug text-fg">{MNEMONIC.names}</p>
+    <aside className="paper flex h-full flex-col justify-end gap-3 p-6">
+      <p className="eyebrow">Mnemonica · Anımsatıcı</p>
+      <p className="latin text-2xl leading-snug text-fg">{MNEMONIC.names}</p>
+      <hr className="rule-gold" />
       <p className="text-sm text-muted">{MNEMONIC.namesTr}</p>
       <p className="text-sm text-muted">{MNEMONIC.types}</p>
       <p className="text-sm text-muted">{MNEMONIC.extraocular}</p>

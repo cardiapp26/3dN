@@ -56,7 +56,7 @@ export function buildQuiz(): QuizItem[] {
         "Çünkü üst motor nörondur",
         "Çünkü alt motor nörondur, alın da ipsilateral innerve edilir",
         "Çünkü V3 motoru tutulur",
-        "Çünkü Edinger–Westphal etkilenir",
+        "Çünkü Edinger-Westphal etkilenir",
       ],
       answer: 1,
       explain: "Santral fasiyal felçte alın korunur (bilateral kortikal innervasyon); Bell'de tüm hemifasiyal tutulur.",
