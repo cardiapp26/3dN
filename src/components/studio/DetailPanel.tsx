@@ -27,7 +27,8 @@ export function DetailPanel() {
             <li key={n.id} className="flex items-baseline justify-between gap-3">
               <span className="text-fg">
                 {n.roman}
-                <span className="ml-2 text-muted">{n.nameTr}</span>
+                <span className="ml-2 font-medium italic text-fg">{n.nameLa}</span>
+                <span className="ml-2 text-xs text-muted">{n.nameTr}</span>
               </span>
               <span className="text-xs">{n.functionShort}</span>
             </li>
@@ -44,8 +45,8 @@ export function DetailPanel() {
       <header className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.18em] text-muted">Nervus cranialis {n.roman}</p>
-          <h2 className="font-display text-2xl text-fg">{n.nameTr}</h2>
-          <p className="italic text-muted">{n.nameLa}</p>
+          <h2 className="font-display text-2xl italic text-fg">{n.nameLa}</h2>
+          <p className="text-muted">{n.nameTr}</p>
         </div>
         <Badge tone={n.type}>{TYPE_LABEL[n.type]}</Badge>
       </header>
@@ -103,8 +104,8 @@ export function DetailPanel() {
           {n.targets.map((t) => (
             <li key={t.id} className="flex items-baseline justify-between gap-2">
               <span>
-                {t.nameTr}
-                <span className="ml-2 italic text-subtle">{t.nameLa}</span>
+                <span className="font-medium italic text-fg">{t.nameLa}</span>
+                {t.nameTr !== t.nameLa && <span className="ml-2 text-subtle">{t.nameTr}</span>}
               </span>
               <span className="text-xs uppercase tracking-wider text-muted">{kindLabel(t.kind)}</span>
             </li>

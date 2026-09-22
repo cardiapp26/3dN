@@ -34,8 +34,8 @@ export function NerveRail() {
               {n.roman}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium text-fg">{n.nameTr}</span>
-              <span className="block truncate text-xs text-muted italic">{n.nameLa}</span>
+              <span className="block truncate text-sm font-semibold italic text-fg">{n.nameLa}</span>
+              <span className="block truncate text-xs text-muted">{n.nameTr}</span>
             </span>
             <Badge tone={n.type} className="hidden sm:inline-flex">
               {TYPE_LABEL[n.type]}

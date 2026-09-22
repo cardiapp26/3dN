@@ -121,7 +121,9 @@ export function ImagingView() {
           <p className="text-sm text-muted">
             İşaret:{" "}
             <span className="text-fg">
-              CN {CRANIAL_NERVES[selectedId - 1].roman} {CRANIAL_NERVES[selectedId - 1].nameTr}
+              CN {CRANIAL_NERVES[selectedId - 1].roman}{" "}
+              <span className="italic">{CRANIAL_NERVES[selectedId - 1].nameLa}</span>{" "}
+              <span className="text-muted">({CRANIAL_NERVES[selectedId - 1].nameTr})</span>
             </span>
           </p>
         )}

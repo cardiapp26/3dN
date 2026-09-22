@@ -22,15 +22,15 @@ export function buildQuiz(): QuizItem[] {
 
   for (const n of CRANIAL_NERVES) {
     const others = CRANIAL_NERVES.filter((x) => x.id !== n.id);
-    const distractors = shuffle(others).slice(0, 3).map((x) => `CN ${x.roman} — ${x.nameTr}`);
-    const correct = `CN ${n.roman} — ${n.nameTr}`;
+    const distractors = shuffle(others).slice(0, 3).map((x) => `CN ${x.roman}: ${x.nameLa}`);
+    const correct = `CN ${n.roman}: ${n.nameLa}`;
     const choices = shuffle([correct, ...distractors]);
     items.push({
       id: `fn-${n.id}`,
       prompt: `Bu işlev hangi kafa çiftine aittir? “${n.functionShort}”`,
       choices,
       answer: choices.indexOf(correct),
-      explain: `${n.nameLa}: ${n.functions[0]}`,
+      explain: `${n.nameLa} (${n.nameTr}): ${n.functions[0]}`,
     });
   }
 

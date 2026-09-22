@@ -64,8 +64,6 @@ function AnatomyViewport() {
 export function Studio() {
   const mode = useStudio((s) => s.mode);
   const setMode = useStudio((s) => s.setMode);
-  const welcome = useStudio((s) => s.welcome);
-  const dismiss = useStudio((s) => s.dismissWelcome);
   const mounted = useMounted();
   const show3d = mode === "explore" || mode === "innervation" || mode === "signal";
 
@@ -139,24 +137,6 @@ export function Studio() {
       {mode !== "quiz" && mode !== "atlas" && mode !== "imaging" && (
         <div className="border-t border-border lg:hidden">
           <DetailPanel />
-        </div>
-      )}
-
-      {welcome && (
-        <div className="absolute inset-0 z-20 flex items-end justify-center bg-bg/70 p-4 md:items-center">
-          <div className="panel-enter max-w-lg rounded-xl bg-surface p-6 shadow-[var(--shadow-border)]">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted">Anatomi stüdyosu</p>
-            <h1 className="mt-1 font-display text-3xl text-fg">On iki kafa çifti</h1>
-            <p className="mt-3 text-sm text-muted">
-              Beyin sapından çıkan sinirleri, innerve ettikleri kas ve organları ve aksiyon
-              potansiyelinin yolunu izleyin. Atlas levhaları gerçeğe yakın anatomik çizimlerdir. MR
-              ve BT paneli kesit mimarisiyle hazırdır; hasta serisi sonraki adımda bağlanacak.
-            </p>
-            <p className="mt-3 text-xs text-subtle">{MNEMONIC.namesTr}</p>
-            <Button className="mt-5" onClick={dismiss}>
-              Stüdyoyu aç
-            </Button>
-          </div>
         </div>
       )}
     </div>

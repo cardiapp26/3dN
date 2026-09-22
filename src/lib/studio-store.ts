@@ -20,7 +20,6 @@ type StudioState = {
   imagingSlice: number;
   imagingModality: ImagingModality;
   imagingSequence: "T1" | "T2" | "FLAIR" | "bone";
-  welcome: boolean;
   setSelected: (id: number | null) => void;
   setHovered: (id: number | null) => void;
   setMode: (mode: StudioMode) => void;
@@ -35,7 +34,6 @@ type StudioState = {
   setImagingSlice: (n: number) => void;
   setImagingModality: (m: ImagingModality) => void;
   setImagingSequence: (s: StudioState["imagingSequence"]) => void;
-  dismissWelcome: () => void;
 };
 
 const defaultLayers: Record<LayerId, boolean> = {
@@ -63,7 +61,6 @@ export const useStudio = create<StudioState>((set) => ({
   imagingSlice: 10,
   imagingModality: "MR",
   imagingSequence: "T1",
-  welcome: true,
   setSelected: (id) =>
     set({
       selectedId: id,
@@ -92,5 +89,4 @@ export const useStudio = create<StudioState>((set) => ({
       imagingSequence: imagingModality === "CT" ? "bone" : "T1",
     }),
   setImagingSequence: (imagingSequence) => set({ imagingSequence }),
-  dismissWelcome: () => set({ welcome: false }),
 }));

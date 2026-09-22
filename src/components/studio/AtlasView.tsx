@@ -50,7 +50,7 @@ export function AtlasView() {
                         selectedId === id ? "bg-accent text-accent-foreground" : "bg-surface-2 text-muted",
                       )}
                     >
-                      {n.roman} {n.nameTr}
+                      {n.roman} <span className="italic">{n.nameLa}</span>
                     </button>
                   );
                 })}

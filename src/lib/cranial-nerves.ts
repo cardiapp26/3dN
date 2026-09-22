@@ -30,7 +30,6 @@ export type CranialNerve = {
   clinical: { test: string; lesion: string; pearl: string };
   mnemonicHint: string;
   atlas: string;
-  camera: { position: [number, number, number]; target: [number, number, number] };
 };
 
 export const LAYERS: { id: LayerId; label: string }[] = [
@@ -74,7 +73,6 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     },
     mnemonicHint: "On — koku, beynin en ön çifti",
     atlas: "/atlas/overview.jpg",
-    camera: { position: [0, 2.4, 7.2], target: [0, 0.8, 0.4] },
   },
   {
     id: 2,
@@ -109,7 +107,6 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     },
     mnemonicHint: "Old — görme",
     atlas: "/atlas/extraocular.jpg",
-    camera: { position: [0, 1.2, 8.4], target: [0, 0.2, 1.2] },
   },
   {
     id: 3,
@@ -150,7 +147,6 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     },
     mnemonicHint: "Olympus — LR6 SO4 geri kalanı 3",
     atlas: "/atlas/extraocular.jpg",
-    camera: { position: [4.8, 1.4, 6.2], target: [1.4, 0.2, 2.0] },
   },
   {
     id: 4,
@@ -182,7 +178,6 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     },
     mnemonicHint: "Towering — SO4",
     atlas: "/atlas/extraocular.jpg",
-    camera: { position: [-5.2, 2.6, 4.8], target: [0, 0.4, 0] },
   },
   {
     id: 5,
@@ -229,7 +224,6 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     },
     mnemonicHint: "Top — diş hekiminin siniri",
     atlas: "/atlas/trigeminal.jpg",
-    camera: { position: [5.6, 1.6, 6.8], target: [0.6, -0.2, 1.2] },
   },
   {
     id: 6,
@@ -258,7 +252,6 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     },
     mnemonicHint: "A — LR6",
     atlas: "/atlas/extraocular.jpg",
-    camera: { position: [5.4, 0.6, 6.0], target: [1.6, 0.1, 2.1] },
   },
   {
     id: 7,
@@ -309,7 +302,6 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     },
     mnemonicHint: "Finn — To Zanzibar By Motor Car",
     atlas: "/atlas/facial.jpg",
-    camera: { position: [6.4, 0.8, 5.6], target: [0.8, -0.4, 1.4] },
   },
   {
     id: 8,
@@ -345,7 +337,6 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     },
     mnemonicHint: "And — işitme / denge",
     atlas: "/atlas/brainstem.jpg",
-    camera: { position: [5.8, -0.2, 4.2], target: [1.2, -0.8, 0.2] },
   },
   {
     id: 9,
@@ -386,7 +377,6 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     },
     mnemonicHint: "German — yutak ve parotis",
     atlas: "/atlas/brainstem.jpg",
-    camera: { position: [4.8, -1.6, 6.4], target: [0.4, -1.6, 0.6] },
   },
   {
     id: 10,
@@ -434,7 +424,6 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     },
     mnemonicHint: "Viewed — gezer",
     atlas: "/atlas/vagus.jpg",
-    camera: { position: [7.4, -4.2, 11.5], target: [0, -3.6, 0.4] },
   },
   {
     id: 11,
@@ -470,7 +459,6 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     },
     mnemonicHint: "Some — omuz ve boyun",
     atlas: "/atlas/accessory.jpg",
-    camera: { position: [6.8, -1.8, 8.2], target: [0.4, -2.2, 0.2] },
   },
   {
     id: 12,
@@ -505,7 +493,6 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     },
     mnemonicHint: "Hops — dilaltı",
     atlas: "/atlas/hypoglossal.jpg",
-    camera: { position: [3.2, -2.4, 8.6], target: [0, -1.8, 1.6] },
   },
 ];
 
