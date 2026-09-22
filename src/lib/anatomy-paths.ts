@@ -25,6 +25,8 @@ export type Course = {
   anchorTo?: AnchorTarget;
   /** Draw on one side only (1 = +x/left, -1 = right) for asymmetric routes. */
   side?: 1 | -1;
+  /** Latin name of this piece, shown when the nerve is selected. */
+  label?: string;
 };
 
 export type NervePath = {
@@ -61,6 +63,7 @@ const RAW_PATHS: NervePath[] = [
     branches: [
       {
         // Fila olfactoria from the septal and superior-concha mucosa.
+        label: "Fila olfactoria mediales",
         points: [
           [0.25, 1.7, 6.5],
           [0.45, 2.6, 6.4],
@@ -68,6 +71,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "Fila olfactoria laterales",
         points: [
           [0.98, 1.8, 7.6],
           [0.85, 2.7, 7.35],
@@ -76,6 +80,7 @@ const RAW_PATHS: NervePath[] = [
       },
       {
         // Medial stria to the septal area.
+        label: "Stria olfactoria medialis",
         anchor: "end",
         anchorTo: "cerebrum",
         points: [
@@ -109,6 +114,7 @@ const RAW_PATHS: NervePath[] = [
     branches: [
       {
         // Nasal retinal fibres cross in the chiasm to the opposite tract.
+        label: "Fibrae nasales",
         points: [
           [0.4, 2.95, 2.65],
           [-0.55, 3.03, 2.3],
@@ -136,6 +142,7 @@ const RAW_PATHS: NervePath[] = [
     },
     branches: [
       {
+        label: "Ramus superior",
         points: [
           [2.1, 2.05, 4.4],
           [2.45, 2.45, 5.1],
@@ -143,6 +150,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "Ramus inferior",
         points: [
           [2.1, 2.05, 4.4],
           [2.05, 1.55, 5.2],
@@ -150,6 +158,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "R. obliquus inferior",
         points: [
           [2.6, 1.0, 5.2],
           [3.3, 0.35, 6.4],
@@ -201,6 +210,7 @@ const RAW_PATHS: NervePath[] = [
     branches: [
       {
         // V1 ophthalmic: frontal nerve to the forehead.
+        label: "N. frontalis",
         points: [
           [2.2, 1.35, 1.7],
           [2.0, 1.85, 2.75],
@@ -213,6 +223,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "N. nasociliaris",
         points: [
           [2.05, 2.28, 3.85],
           [1.9, 2.15, 5.0],
@@ -220,6 +231,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "N. lacrimalis",
         points: [
           [2.5, 2.9, 5.2],
           [3.4, 2.75, 6.2],
@@ -228,6 +240,7 @@ const RAW_PATHS: NervePath[] = [
       },
       {
         // V3 mandibular trunk through foramen ovale.
+        label: "N. mandibularis",
         points: [
           [2.45, 1.1, 1.65],
           [2.45, 0.3, 2.0],
@@ -236,6 +249,7 @@ const RAW_PATHS: NervePath[] = [
       },
       {
         // Inferior alveolar -> mandibular canal -> mental foramen.
+        label: "N. alveolaris inferior",
         points: [
           [2.9, -0.9, 2.6],
           [4.3, -3.6, 2.55],
@@ -249,6 +263,7 @@ const RAW_PATHS: NervePath[] = [
       },
       {
         // Lingual nerve to the anterior tongue.
+        label: "N. lingualis",
         points: [
           [2.9, -0.9, 2.6],
           [3.35, -3.4, 3.3],
@@ -258,6 +273,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "R. massetericus",
         points: [
           [2.9, -0.9, 2.6],
           [4.3, -1.1, 2.2],
@@ -265,6 +281,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "Nn. temporales profundi",
         points: [
           [2.9, -0.9, 2.6],
           [4.9, -0.2, 2.9],
@@ -273,6 +290,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "N. auriculotemporalis",
         points: [
           [2.9, -0.9, 2.6],
           [4.3, -1.3, 0.7],
@@ -323,6 +341,7 @@ const RAW_PATHS: NervePath[] = [
     },
     branches: [
       {
+        label: "Rr. temporales",
         points: [
           [5.45, -2.6, 1.7],
           [6.95, -0.4, 3.1],
@@ -331,6 +350,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "Rr. zygomatici",
         points: [
           [5.45, -2.6, 1.7],
           [6.55, -1.2, 4.2],
@@ -339,6 +359,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "Rr. buccales",
         points: [
           [5.45, -2.6, 1.7],
           [6.3, -3.2, 4.4],
@@ -347,6 +368,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "R. marginalis mandibulae",
         points: [
           [5.45, -2.6, 1.7],
           [6.1, -5.8, 2.9],
@@ -355,6 +377,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "R. colli",
         points: [
           [5.45, -2.6, 1.7],
           [5.2, -6.3, 1.7],
@@ -363,6 +386,7 @@ const RAW_PATHS: NervePath[] = [
       },
       {
         // Greater petrosal -> pterygopalatine ganglion -> lacrimal gland.
+        label: "N. petrosus major",
         points: [
           [3.55, 0.82, 0.7],
           [2.8, 0.75, 2.2],
@@ -373,6 +397,7 @@ const RAW_PATHS: NervePath[] = [
       },
       {
         // Chorda tympani joins the lingual nerve.
+        label: "Chorda tympani",
         points: [
           [4.42, -1.0, -0.62],
           [4.3, -0.35, 0.55],
@@ -400,6 +425,7 @@ const RAW_PATHS: NervePath[] = [
     },
     branches: [
       {
+        label: "N. cochlearis",
         points: [
           [3.9, 0.6, -0.35],
           [3.3, 0.66, -0.25],
@@ -429,6 +455,7 @@ const RAW_PATHS: NervePath[] = [
     branches: [
       {
         // Tympanic -> lesser petrosal -> otic ganglion -> parotid.
+        label: "N. tympanicus",
         points: [
           [2.85, -2.2, -0.95],
           [3.55, -0.7, -0.35],
@@ -439,6 +466,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "R. sinus carotici",
         points: [
           [2.9, -3.8, 0.0],
           [2.7, -6.5, 1.8],
@@ -472,6 +500,7 @@ const RAW_PATHS: NervePath[] = [
     },
     branches: [
       {
+        label: "Rr. pharyngei",
         points: [
           [3.0, -3.5, -0.7],
           [2.2, -4.8, 1.0],
@@ -479,6 +508,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "N. laryngeus superior",
         points: [
           [3.0, -4.3, -0.45],
           [2.6, -8.0, 2.2],
@@ -487,6 +517,7 @@ const RAW_PATHS: NervePath[] = [
       },
       {
         // Left recurrent laryngeal hooks under the aortic arch.
+        label: "N. laryngeus recurrens",
         side: 1,
         points: [
           [2.9, -18.2, 2.4],
@@ -500,6 +531,7 @@ const RAW_PATHS: NervePath[] = [
       },
       {
         // Right recurrent laryngeal hooks under the subclavian artery.
+        label: "N. laryngeus recurrens",
         side: -1,
         points: [
           [2.79, -16.4, 2.06],
@@ -512,6 +544,7 @@ const RAW_PATHS: NervePath[] = [
       },
       {
         // Cardiac branches to the plexus under the arch.
+        label: "Rr. cardiaci",
         points: [
           [2.8, -14.0, 1.7],
           [1.9, -19.5, 2.4],
@@ -519,6 +552,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "Rr. pulmonales",
         points: [
           [2.5, -25.5, 0.7],
           [4.2, -26.5, 0.6],
@@ -547,6 +581,7 @@ const RAW_PATHS: NervePath[] = [
     },
     branches: [
       {
+        label: "Radix cranialis",
         anchor: "start",
         points: [
           [0.85, -1.3, -1.3],
@@ -554,6 +589,7 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
+        label: "R. sternocleidomastoideus",
         points: [
           [4.1, -5.2, -1.6],
           [4.35, -5.9, -0.2],
@@ -582,12 +618,14 @@ const RAW_PATHS: NervePath[] = [
     },
     branches: [
       {
+        label: "Rr. linguales",
         points: [
           [1.3, -7.0, 5.6],
           [1.6, -6.1, 6.6],
         ],
       },
       {
+        label: "Radix superior ansae",
         points: [
           [1.3, -7.0, 5.6],
           [0.5, -7.6, 5.0],

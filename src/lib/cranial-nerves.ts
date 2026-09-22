@@ -62,7 +62,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     foramen: "Lamina cribrosa (os ethmoidale)",
     course:
       "Fila olfactoria kribriform plaktan geçer, koku soğanında sinaps yapar; tractus olfactorius primer koku korteksine gider.",
-    branches: ["Fila olfactoria", "Tractus olfactorius", "Stria olfactoria medialis / lateralis"],
+    branches: ["Fila olfactoria mediales", "Fila olfactoria laterales", "Tractus olfactorius", "Stria olfactoria medialis", "Stria olfactoria lateralis"],
     targets: [
       { id: "olf-epith", nameTr: "Koku epiteli", nameLa: "Regio olfactoria", kind: "sense", fiber: "special-sense" },
     ],
@@ -130,7 +130,7 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     foramen: "Fissura orbitalis superior",
     course:
       "Posterior serebral ve superior serebellar arterler arasından, kavernöz sinüs lateral duvarından orbitaya. Üst ve alt dallara ayrılır.",
-    branches: ["Ramus superior", "Ramus inferior", "Radix parasympathica (ganglion ciliare)"],
+    branches: ["Ramus superior", "Ramus inferior", "R. obliquus inferior", "Radix parasympathica (ganglion ciliare)"],
     targets: [
       { id: "sr", nameTr: "M. rectus superior", nameLa: "M. rectus superior", kind: "muscle", fiber: "somatic-motor" },
       { id: "ir", nameTr: "M. rectus inferior", nameLa: "M. rectus inferior", kind: "muscle", fiber: "somatic-motor" },
@@ -204,9 +204,16 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     course:
       "Ganglion trigeminale (Gasser) impressio trigeminalis'te. V1 kavernöz sinüs lateralinden FOS; V2 rotundum → fossa pterygopalatina; V3 ovale → fossa infratemporalis.",
     branches: [
-      "N. ophthalmicus (V1): n. frontalis, lacrimalis, nasociliaris",
-      "N. maxillaris (V2): n. infraorbitalis, zygomaticus, palatini",
-      "N. mandibularis (V3): n. lingualis, alveolaris inferior, auriculotemporalis, motor dallar",
+      "N. frontalis",
+      "N. lacrimalis",
+      "N. nasociliaris",
+      "N. infraorbitalis",
+      "N. zygomaticus",
+      "Nn. palatini",
+      "N. alveolaris inferior",
+      "N. lingualis",
+      "N. auriculotemporalis",
+      "Rr. musculares",
     ],
     targets: [
       { id: "masseter", nameTr: "M. masseter", nameLa: "M. masseter", kind: "muscle", fiber: "somatic-motor" },
@@ -282,7 +289,11 @@ export const CRANIAL_NERVES: CranialNerve[] = [
       "N. petrosus major",
       "N. stapedius",
       "Chorda tympani",
-      "Temporal, zigomatik, bukkal, marjinal mandibular, servikal",
+      "Rr. temporales",
+      "Rr. zygomatici",
+      "Rr. buccales",
+      "R. marginalis mandibulae",
+      "R. colli",
     ],
     targets: [
       { id: "frontalis", nameTr: "M. frontalis", nameLa: "M. occipitofrontalis (venter frontalis)", kind: "muscle", fiber: "somatic-motor" },
@@ -404,10 +415,14 @@ export const CRANIAL_NERVES: CranialNerve[] = [
     course:
       "Karotis kılıfında seyrederek toraksa iner. Sol rekürren laringeal aortik arkusu, sağ subklavyanı dolar. Özofagus pleksusu, sonra anterior/posterior vagal gövdeler olarak hiatus'tan karına.",
     branches: [
-      "R. meningeus, r. auricularis (Arnold)",
-      "N. laryngeus superior / recurrens",
-      "Rr. cardiaci, pulmonales, oesophageales",
-      "Trunci vagales anterior / posterior",
+      "R. meningeus",
+      "R. auricularis",
+      "N. laryngeus superior",
+      "N. laryngeus recurrens",
+      "Rr. cardiaci",
+      "Rr. pulmonales",
+      "Rr. oesophageales",
+      "Trunci vagales",
     ],
     targets: [
       { id: "larynx", nameTr: "Larinks kasları", nameLa: "Musculi laryngis", kind: "muscle", fiber: "somatic-motor" },

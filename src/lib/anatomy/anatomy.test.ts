@@ -244,6 +244,15 @@ describe("nerve courses", () => {
     }
   });
 
+  it("names every branch piece", () => {
+    for (const path of NERVE_PATHS) {
+      path.branches.forEach((course, i) => {
+        assert.equal(typeof course.label, "string", `CN ${path.id} branch ${i}`);
+        assert.ok((course.label ?? "").trim().length > 2, `CN ${path.id} branch ${i}`);
+      });
+    }
+  });
+
   it("have at least two points per course", () => {
     for (const path of NERVE_PATHS) {
       for (const course of [path.main, ...path.branches]) {

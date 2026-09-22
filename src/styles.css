@@ -121,6 +121,13 @@
   letter-spacing: 0;
 }
 
+.nerve-chip-branch {
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 10px;
+  padding: 2px 8px 3px;
+}
+
 /* Latin terminology: the primary voice of the interface. */
 .latin {
   font-family: var(--font-display);

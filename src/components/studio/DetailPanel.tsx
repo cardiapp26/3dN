@@ -3,6 +3,7 @@ import { Play, Pause, RotateCcw, Maximize2, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CRANIAL_NERVES, TYPE_LABEL, ATLAS_PLATES, type AtlasPlate, nerveById } from "@/lib/cranial-nerves";
+import { eyeActionText } from "@/lib/eye-motion";
 import { useStudio } from "@/lib/studio-store";
 import { AtlasLightbox } from "./AtlasLightbox";
 
@@ -106,6 +107,8 @@ export function DetailPanel() {
           />
         </label>
       </div>
+
+      {eyeActionText(n.id) && <p className="text-xs leading-relaxed text-muted">{eyeActionText(n.id)}</p>}
 
       <Section title="Functio" caption="İşlev">
         <ul className="list-disc space-y-1 pl-4 marker:text-subtle">

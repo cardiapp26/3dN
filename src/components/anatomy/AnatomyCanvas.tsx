@@ -11,12 +11,21 @@ import {
   BufferAttribute,
   BufferGeometry,
   Color,
+  Group,
+  Mesh,
   MeshBasicMaterial,
   MeshPhysicalMaterial,
   ShaderMaterial,
   Vector3,
 } from "three";
 import { nerveById } from "@/lib/cranial-nerves";
+import {
+  currentEyePose,
+  eomModelForNerve,
+  EOM_APEX,
+  eyeSigns,
+  stepEyeMotion,
+} from "@/lib/eye-motion";
 import {
   DEFAULT_VIEW,
   EYE,
@@ -43,6 +52,7 @@ import {
   VIEW_VARYINGS,
   vivid,
 } from "./NerveSystem";
+import { installRadialTwitch } from "./muscle-twitch";
 
 /* ------------------------------------------------------------------ */
 /* Organ meshes: built once per page in workers, cached across mounts  */
@@ -357,16 +367,23 @@ function SoftOrgans({
   const explode = useStudio((s) => s.explode);
   const mode = useStudio((s) => s.mode);
   const showLabels = useStudio((s) => s.showLabels);
-  const mats = useMemo(
-    () =>
-      new Map(
-        SOFT_MODELS.filter((m) => m.material !== "bone").map((m) => [
-          m.id,
-          makeSoftMaterial(m.material as SoftTemplate),
-        ]),
-      ),
-    [],
-  );
+  const mats = useMemo(() => {
+    const built = new Map(
+      SOFT_MODELS.filter((m) => m.material !== "bone").map((m) => [
+        m.id,
+        makeSoftMaterial(m.material as SoftTemplate),
+      ]),
+    );
+    return built;
+  }, []);
+  const twitchById = useMemo(() => {
+    const map = new Map<string, { value: number }>();
+    for (const [id, apex] of Object.entries(EOM_APEX)) {
+      const material = mats.get(id);
+      if (material) map.set(id, installRadialTwitch(material, id, apex));
+    }
+    return map;
+  }, [mats]);
   const lungDepth = useMemo(() => new MeshBasicMaterial({ colorWrite: false, transparent: true }), []);
   useEffect(
     () => () => {
@@ -431,7 +448,26 @@ function SoftOrgans({
                   </group>
                 );
               }
-              return <mesh key={dir} geometry={geometry} material={material} position={position} scale={scale} />;
+              const twitch = twitchById.get(model.id);
+              return (
+                <mesh
+                  key={dir}
+                  geometry={geometry}
+                  material={material}
+                  position={position}
+                  scale={scale}
+                  onBeforeRender={
+                    twitch
+                      ? () => {
+                          const state = useStudio.getState();
+                          const owned = eomModelForNerve(state.selectedId) === model.id;
+                          const shown = eyeSigns(state.side).includes(dir);
+                          twitch.value = owned && shown ? currentEyePose().twitch : 0;
+                        }
+                      : undefined
+                  }
+                />
+              );
             })}
             {label}
           </group>
@@ -444,34 +480,69 @@ function SoftOrgans({
 /** Nerves that start at or insert on the eyeball. */
 const OCULAR_NERVES = new Set([2, 3, 4, 6]);
 
+/** How far III swings the upper lid up, radians. Negative rotation opens. */
+const LID_LIFT = 0.42;
+
+function Eye({ sign }: { sign: 1 | -1 }) {
+  const globe = useRef<Group>(null);
+  const lid = useRef<Group>(null);
+  const pupil = useRef<Mesh>(null);
+  const [cx, cy, cz] = EYE.center;
+  const r = EYE.radius;
+
+  useFrame(() => {
+    const pose = currentEyePose();
+    const on = eyeSigns(useStudio.getState().side).includes(sign);
+    const g = globe.current;
+    if (g) g.rotation.set(on ? pose.pitch : 0, on ? pose.yaw * sign : 0, on ? pose.roll * sign : 0);
+    const l = lid.current;
+    if (l) l.rotation.x = -LID_LIFT * (on ? pose.lid : 0);
+    const p = pupil.current;
+    if (p) {
+      const k = on ? pose.pupil : 1;
+      p.scale.set(k, 1, k);
+    }
+  });
+
+  return (
+    <group position={[cx * sign, cy, cz]}>
+      <group ref={globe}>
+        <mesh>
+          <sphereGeometry args={[r, 48, 32]} />
+          <meshPhysicalMaterial color="#f1ece4" roughness={0.35} clearcoat={0.6} clearcoatRoughness={0.2} />
+        </mesh>
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <sphereGeometry args={[r * 1.004, 48, 12, 0, Math.PI * 2, 0, 0.47]} />
+          <meshStandardMaterial color="#4d6e7c" roughness={0.55} />
+        </mesh>
+        <mesh ref={pupil} rotation={[Math.PI / 2, 0, 0]}>
+          <sphereGeometry args={[r * 1.008, 32, 8, 0, Math.PI * 2, 0, 0.19]} />
+          <meshStandardMaterial color="#0c0d0e" roughness={0.3} />
+        </mesh>
+        <mesh position={[0, 0, 0.62]} rotation={[Math.PI / 2, 0, 0]}>
+          <sphereGeometry args={[0.8, 32, 16, 0, Math.PI * 2, 0, 0.95]} />
+          <meshPhysicalMaterial color="#ffffff" transparent opacity={0.16} roughness={0.05} clearcoat={1} depthWrite={false} />
+        </mesh>
+      </group>
+      <group ref={lid}>
+        <mesh>
+          {/* Upper-lid shell: anterior (phi around +Z) and above the corneal centre. */}
+          <sphereGeometry args={[r * 1.04, 28, 14, -1.05, 2.1, 0.72, 0.48]} />
+          <meshStandardMaterial color="#d7b5a4" roughness={0.74} />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
 function Eyes() {
   const layers = useStudio((s) => s.layers);
   const selected = useStudio((s) => s.selectedId);
-  const [cx, cy, cz] = EYE.center;
-  const r = EYE.radius;
   const visible = layers.skull || layers.muscles || (selected !== null && OCULAR_NERVES.has(selected));
   return (
     <group visible={visible}>
-      {([1, -1] as const).map((side) => (
-        <group key={side} position={[cx * side, cy, cz]}>
-          <mesh>
-            <sphereGeometry args={[r, 48, 32]} />
-            <meshPhysicalMaterial color="#f1ece4" roughness={0.35} clearcoat={0.6} clearcoatRoughness={0.2} />
-          </mesh>
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <sphereGeometry args={[r * 1.004, 48, 12, 0, Math.PI * 2, 0, 0.47]} />
-            <meshStandardMaterial color="#4d6e7c" roughness={0.55} />
-          </mesh>
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <sphereGeometry args={[r * 1.008, 32, 8, 0, Math.PI * 2, 0, 0.19]} />
-            <meshStandardMaterial color="#0c0d0e" roughness={0.3} />
-          </mesh>
-          <mesh position={[0, 0, 0.62]} rotation={[Math.PI / 2, 0, 0]}>
-            <sphereGeometry args={[0.8, 32, 16, 0, Math.PI * 2, 0, 0.95]} />
-            <meshPhysicalMaterial color="#ffffff" transparent opacity={0.16} roughness={0.05} clearcoat={1} depthWrite={false} />
-          </mesh>
-        </group>
-      ))}
+      <Eye sign={1} />
+      <Eye sign={-1} />
     </group>
   );
 }
@@ -526,10 +597,14 @@ function CameraRig({ controls }: { controls: MutableRefObject<{ target: Vector3 
 
 function SignalDriver() {
   useFrame((_, dt) => {
-    const { playing, selectedId, signalSpeed, signalProgress } = useStudio.getState();
-    if (!playing || selectedId === null) return;
-    const next = signalProgress + signalSpeed * Math.min(dt, 0.1);
-    useStudio.setState({ signalProgress: next >= 1 ? 0 : next });
+    const step = Math.min(dt, 0.1);
+    const state = useStudio.getState();
+    if (state.playing && state.selectedId !== null) {
+      const next = state.signalProgress + state.signalSpeed * step;
+      useStudio.setState({ signalProgress: next >= 1 ? 0 : next });
+    }
+    const now = useStudio.getState();
+    stepEyeMotion(now.selectedId, now.signalProgress, step);
   });
   return null;
 }
@@ -577,7 +652,6 @@ export function AnatomyCanvas() {
         dpr={[1, 2]}
         camera={{ position: DEFAULT_VIEW.position, fov: 32, near: 0.5, far: 400 }}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-        onPointerMissed={() => setSelected(null)}
       >
         <Lights />
         <CameraRig controls={controls} />
