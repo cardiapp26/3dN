@@ -135,19 +135,20 @@ export function AtlasView() {
                 <button
                   type="button"
                   aria-label={`${p.title} levhasını incele`}
-                  className="atlas-frame-wrap relative aspect-[4/3] w-full cursor-pointer bg-[#0c0a09]"
+                  className="atlas-frame-wrap relative aspect-square w-full cursor-pointer"
                   onClick={() => setActivePlate(p)}
                 >
                   <img
                     src={p.src}
                     alt={p.title}
-                    className="atlas-img w-full h-full object-contain p-1"
+                    className="atlas-img"
                     crossOrigin="anonymous"
                     loading="lazy"
+                    decoding="async"
                   />
 
                   {/* Orientation badge */}
-                  <span className="absolute left-2.5 top-2.5 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium tracking-wider text-white/70 backdrop-blur">
+                  <span className="absolute left-3 top-3 rounded border border-white/15 bg-[#1b1a18]/80 px-2 py-1 text-[10px] font-medium tracking-wider text-white backdrop-blur">
                     {p.orientation === "portrait" ? "DİKEY" : "YATAY"}
                   </span>
 

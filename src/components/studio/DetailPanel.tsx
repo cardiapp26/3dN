@@ -176,12 +176,12 @@ export function DetailPanel() {
           onClick={() => setActivePlate(plate)}
           className="group relative block w-full cursor-pointer overflow-hidden rounded-lg border border-border bg-surface text-left transition-all hover:border-gold/50 hover:shadow-md"
         >
-          <span className="relative block aspect-[16/10] overflow-hidden bg-[#100e0c]">
+          <span className="atlas-frame-wrap relative block aspect-square overflow-hidden">
             <img
               src={plate.src}
               alt={plate.title}
               loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="atlas-img"
             />
             <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-[1px] transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-gold px-3 py-1 text-xs font-semibold text-black shadow">
