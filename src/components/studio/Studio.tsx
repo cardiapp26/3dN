@@ -8,12 +8,15 @@ import {
   Zap,
   Eye,
   SplitSquareHorizontal,
+  Stethoscope,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LAYERS, MNEMONIC, type StudioMode } from "@/lib/cranial-nerves";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
 import { AtlasView } from "./AtlasView";
+import { BellPalsyView } from "./BellPalsyView";
 import { DetailPanel } from "./DetailPanel";
 import { ImagingView } from "./ImagingView";
 import { NerveRail } from "./NerveRail";
@@ -26,6 +29,7 @@ const MODES: { id: StudioMode; label: string; icon: typeof Eye }[] = [
   { id: "atlas", label: "Atlas", icon: BookOpen },
   { id: "imaging", label: "MR / BT", icon: Scan },
   { id: "quiz", label: "Sınav", icon: GraduationCap },
+  { id: "bell", label: "Bell Paralizisi", icon: Stethoscope },
 ];
 
 function useMounted() {
@@ -130,15 +134,17 @@ export function Studio() {
           {mode === "atlas" && <AtlasView />}
           {mode === "imaging" && <ImagingView />}
           {mode === "quiz" && <QuizView />}
+          {mode === "bell" && <BellPalsyView />}
         </main>
 
         <div className="order-3 hidden border-t border-border lg:block lg:border-l lg:border-t-0">
-          {mode !== "quiz" && mode !== "atlas" && mode !== "imaging" && <DetailPanel />}
+          {mode === "bell" && <BellSideCard />}
+          {mode !== "quiz" && mode !== "atlas" && mode !== "imaging" && mode !== "bell" && <DetailPanel />}
           {(mode === "atlas" || mode === "imaging" || mode === "quiz") && <MnemonicCard />}
         </div>
       </div>
 
-      {mode !== "quiz" && mode !== "atlas" && mode !== "imaging" && (
+      {mode !== "quiz" && mode !== "atlas" && mode !== "imaging" && mode !== "bell" && (
         <div className="border-t border-border lg:hidden">
           <DetailPanel />
         </div>
@@ -227,6 +233,65 @@ function MnemonicCard() {
       <p className="text-sm text-muted">{MNEMONIC.types}</p>
       <p className="text-sm text-muted">{MNEMONIC.extraocular}</p>
       <p className="text-xs text-subtle">Eğitim amaçlıdır; tanı veya tedavi için kullanılmaz.</p>
+    </aside>
+  );
+}
+
+function BellSideCard() {
+  const setSelected = useStudio((s) => s.setSelected);
+  const setMode = useStudio((s) => s.setMode);
+
+  return (
+    <aside className="paper scroll-thin flex h-full flex-col justify-between gap-5 overflow-y-auto p-6">
+      <div className="space-y-4">
+        <div>
+          <p className="eyebrow text-gold">Klinik Kılavuz</p>
+          <h2 className="latin mt-1 text-2xl leading-tight text-fg">N. facialis & Bell</h2>
+          <p className="text-xs text-muted">VII. Kranial Sinir Acil Durumu</p>
+          <hr className="rule-gold mt-3" />
+        </div>
+
+        <div className="space-y-3 text-xs leading-relaxed text-muted">
+          <div className="rounded-lg bg-surface p-3">
+            <p className="font-semibold text-fg">Etiyoloji ve Mekanizma</p>
+            <p className="mt-1">
+              HSV-1/VZV reaktivasyonuna sekonder Fallop kanalında (özellikle 0.68 mm dar labirentin segmentte) ödem ve iskemik bası.
+            </p>
+          </div>
+
+          <div className="rounded-lg bg-surface p-3">
+            <p className="font-semibold text-fg">Santral vs Periferik Eşik</p>
+            <p className="mt-1">
+              Alın kırışıklıklarının kaybı periferik lezyonu (Bell) kanıtlar; inmede bilateral kortikal innervasyon nedeniyle alın korunur.
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-gold/30 bg-gold/5 p-3">
+            <p className="font-semibold text-gold">En Kritik Adım: Göz Koruma</p>
+            <p className="mt-1 text-fg/90">
+              Lagoftalmi kornea ülseri ve körlük yaratabilir. Gündüz koruyucusuz yapay gözyaşı, gece yoğun oftalmik pomad ve nem odacığı şarttır.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2 border-t border-border pt-4">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="w-full gap-2 border border-border"
+          onClick={() => {
+            setSelected(7);
+            setMode("innervation");
+          }}
+        >
+          <Sparkles className="size-3.5 text-gold" />
+          <span>3D N. Facialis'e Odaklan</span>
+        </Button>
+        <p className="text-center text-[10px] text-subtle">
+          Cranialis · Nörolojik Simülasyon
+        </p>
+      </div>
     </aside>
   );
 }

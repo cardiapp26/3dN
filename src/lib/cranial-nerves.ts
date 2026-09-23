@@ -1,5 +1,5 @@
 export type FiberType = "sensory" | "motor" | "mixed";
-export type StudioMode = "explore" | "innervation" | "signal" | "atlas" | "imaging" | "quiz";
+export type StudioMode = "explore" | "innervation" | "signal" | "atlas" | "imaging" | "quiz" | "bell";
 export type LayerId = "skull" | "brain" | "brainstem" | "nerves" | "muscles" | "organs" | "nuclei";
 
 export type InnervationTarget = {
