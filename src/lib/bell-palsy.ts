@@ -4,21 +4,13 @@
  * Tıbbi referanslar ve klinik protokoller:
  * - House JW, Brackmann DE. Facial nerve grading system. Otolaryngol Head Neck Surg. 1985.
  * - Baugh RF, et al. Clinical Practice Guideline: Bell's Palsy. Otolaryngol Head Neck Surg. 2013.
- * - Guntinas-Lichius O, et al. Facial nerve paresis: Etiology, diagnosis, and treatment. Dtsch Arztebl Int. 2020.
+ * - Fujiwara T, et al. Japanese clinical practice guidelines for Bell's palsy, 2023 update. Auris Nasus Larynx. 2024.
+ * - Clinical Practice Guideline for the Evaluation and Management of Facial Nerve Palsy. 2026.
  */
 
-export type PalsyType =
-  | "normal"
-  | "bell-left"
-  | "bell-right"
-  | "central-left"
-  | "central-right";
+export type PalsyType = "normal" | "bell-left" | "bell-right" | "central-left" | "central-right";
 
-export type MimicTest =
-  | "wrinkle-forehead"
-  | "close-eyes"
-  | "smile"
-  | "puff-cheeks";
+export type MimicTest = "wrinkle-forehead" | "close-eyes" | "smile" | "puff-cheeks";
 
 export type HouseBrackmannGrade = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -33,8 +25,7 @@ export interface HouseBrackmannInfo {
   eye: string;
   mouth: string;
   synkinesis: string;
-  recoveryRate: string;
-  management: string;
+  clinicalFocus: string;
 }
 
 export interface TopodiagnosticLevel {
@@ -69,6 +60,30 @@ export interface FacialState {
   anatomicalBasis: string;
 }
 
+export const HOUSE_BRACKMANN_NOTE =
+  "House-Brackmann global fasiyal fonksiyonu I–VI arasında tanımlar. Tek başına etiyoloji, prognoz veya tedavi seçmez; bölgesel farklılıkları maskeleyebilir.";
+
+export const BELL_PALSY_SAFETY = {
+  definition:
+    "Bell paralizisi, hızla gelişen tek taraflı periferik fasiyal güçsüzlükte diğer nedenler dışlandıktan sonra kullanılan klinik tanıdır.",
+  patternWarning:
+    "Alın korunması santral paterni destekler; alın tutulumu ise inmeyi tek başına dışlamaz. Başlangıç zamanı ve eşlik eden nörolojik bulgular birlikte değerlendirilir.",
+  emergencySigns: [
+    "Kol veya bacak güçsüzlüğü, uyuşma ya da belirgin dengesizlik",
+    "Konuşma bozukluğu, bilinç değişikliği, çift görme veya yeni şiddetli baş ağrısı",
+    "Ani başlayan yüz güçsüzlüğü ve inme olasılığı",
+    "Göz ağrısı, kızarıklık, fotofobi veya görme azalması",
+  ],
+  atypicalFeatures: [
+    "Yavaş ilerleme, üç haftadan uzun kötüleşme veya üç ayda iyileşme başlamaması",
+    "Tekrarlayan aynı taraf felç, iki taraflı tutulum veya yalnız tek terminal dal tutulumu",
+    "Başka kranial sinir bulguları, belirgin işitme kaybı, vertigo veya parotis kitlesi",
+    "Kulak çevresinde vezikül, şiddetli otalji, travma veya orta kulak hastalığı",
+  ],
+  disclaimer:
+    "Bu modül eğitim içindir. Akut yüz güçsüzlüğü gerçek hastada acil klinik değerlendirme gerektirir.",
+} as const;
+
 /**
  * House-Brackmann Fasiyal Sinir Derecelendirme Skalası
  */
@@ -84,8 +99,7 @@ export const HOUSE_BRACKMANN_GRADES: Record<HouseBrackmannGrade, HouseBrackmannI
     eye: "Minimal eforla tam göz kapanması.",
     mouth: "Simetrik gülümseme ve mimik hareketi.",
     synkinesis: "Sinkinezi, kontraktür veya spazm yok.",
-    recoveryRate: "%100 (Bazal fizyolojik durum)",
-    management: "Tedavi gerekmez; klinik takip.",
+    clinicalFocus: "Normal fonksiyon. Evre, etiyoloji veya tedavi gereksinimi belirtmez.",
   },
   2: {
     grade: 2,
@@ -97,9 +111,8 @@ export const HOUSE_BRACKMANN_GRADES: Record<HouseBrackmannGrade, HouseBrackmannI
     forehead: "Orta-iyi düzeyde hareket korur.",
     eye: "Minimal eforla tam kapanır; hafif asimetri.",
     mouth: "Maksimal eforda hafif asimetri.",
-    synkinesis: "Yok veya ancak mikroskobik düzeyde.",
-    recoveryRate: "%90-95 spontan tam düzelme",
-    management: "Standart 72 saatlik kortikosteroid protokolü, gündüz yapay gözyaşı.",
+    synkinesis: "Yok ya da çok hafif.",
+    clinicalFocus: "Hafif global disfonksiyon; seri muayenede değişimi kaydetmek için kullanılır.",
   },
   3: {
     grade: 3,
@@ -112,8 +125,7 @@ export const HOUSE_BRACKMANN_GRADES: Record<HouseBrackmannGrade, HouseBrackmannI
     eye: "Efor sarf ederek tam kapanır.",
     mouth: "Maksimal eforla belirgin zayıflık, asimetrik çekilme.",
     synkinesis: "Farkedilebilir ancak hafif sinkinezi veya hemifasiyal spazm görülebilir.",
-    recoveryRate: "%80-85 tam/tatmin edici düzelme",
-    management: "Kortikosteroid + yoğun göz koruma (gündüz damla, gece pomad).",
+    clinicalFocus: "Göz eforla tamamen kapanır. Bölgesel ayrıntı için ek bir ölçek gerekebilir.",
   },
   4: {
     grade: 4,
@@ -122,26 +134,25 @@ export const HOUSE_BRACKMANN_GRADES: Record<HouseBrackmannGrade, HouseBrackmannI
     latinTitle: "Disfunctio modice gravis",
     summary: "Belirgin ve şekil bozan zayıflık. Göz tam kapanamaz (lagoftalmi mevcuttur).",
     rest: "Normal simetri ve tonus korunur.",
-    forehead: "Hiç hareket yok (tam pitoz / alın düzleşmesi).",
-    eye: "Tam kapanamaz (Lagoftalmi + belirgin Bell fenomeni).",
+    forehead: "Hareket yok.",
+    eye: "Tam kapanamaz; lagoftalmi vardır.",
     mouth: "Maksimal eforda belirgin asimetrik ve zayıf hareket.",
     synkinesis: "Belirgin sinkinezi, kitle hareketi ve kontraktür riski.",
-    recoveryRate: "%60-70 parsiyel düzelme",
-    management: "Kortikosteroid + Antiviral (Valasiklovir), agresif kornea koruması, nem odacığı.",
+    clinicalFocus:
+      "Eksik göz kapanması kornea riskini artırır; göz koruma gereksinimi ayrıca değerlendirilir.",
   },
   5: {
     grade: 5,
     roman: "V",
     title: "Ağır Disfonksiyon",
     latinTitle: "Disfunctio gravis",
-    summary: "İstirahatte bile asimetri. Ancak zorlukla fark edilen kılcal hareket mevcuttur.",
+    summary: "İstirahatte asimetri; ancak güçlükle fark edilen hareket mevcuttur.",
     rest: "İstirahatte belirgin asimetri, yüzün tutulan tarafı sarkık.",
     forehead: "Hiç hareket yok.",
     eye: "Göz kapanamaz, geniş lagoftalmi ve skleranın belirgin görünmesi.",
     mouth: "Ancak hafif seğirme şeklinde minimal hareket.",
-    synkinesis: "Genellikle geç dönemde şiddetli sinkineziyle seyreder.",
-    recoveryRate: "%30-50 parsiyel düzelme (sekelli iyileşme)",
-    management: "Kombine steroid + antiviral tedavi, erken ENoG/EMG, saatlik göz damlası, gece bandajı.",
+    synkinesis: "Minimal istemli hareket nedeniyle sinkinezi değerlendirmesi sınırlı olabilir.",
+    clinicalFocus: "Çok az hareket vardır. Kornea güvenliği ve uzman değerlendirmesi önceliklidir.",
   },
   6: {
     grade: 6,
@@ -153,9 +164,9 @@ export const HOUSE_BRACKMANN_GRADES: Record<HouseBrackmannGrade, HouseBrackmannI
     forehead: "Sıfır hareket.",
     eye: "Sıfır kapanma (Geniş lagoftalmi, kornea kuruma riski en yüksek seviyede).",
     mouth: "Sıfır hareket.",
-    synkinesis: "Başlangıçta yok (denervasyon); 3-6 ay sonra aberan re-innervasyon gelişebilir.",
-    recoveryRate: "%15-25 kalıcı defisit riski yüksek",
-    management: "Acil göz koruma protokolü, oftalmoloji konsültasyonu, cerrahi dekompresyon tartışması.",
+    synkinesis: "İstemli hareket olmadığı için akut evrede değerlendirilemez.",
+    clinicalFocus:
+      "Hiç hareket yoktur. Etiyoloji, kornea güvenliği ve prognoz ayrı değerlendirilir.",
   },
 };
 
@@ -179,7 +190,7 @@ export const TOPODIAGNOSTIC_LEVELS: TopodiagnosticLevel[] = [
     lacrimation: {
       intact: false,
       test: "Schirmer Testi",
-      finding: "Şiddetli lakrimasyon azalması (<5 mm ıslanma / kuru göz).",
+      finding: "Lakrimasyon azalabilir; bulgu karşı taraf ve klinik bağlamla birlikte yorumlanır.",
     },
     stapedius: {
       intact: false,
@@ -189,7 +200,7 @@ export const TOPODIAGNOSTIC_LEVELS: TopodiagnosticLevel[] = [
     taste: {
       intact: false,
       test: "Elektrogustometri / Kimyasal Tat Testi",
-      finding: "Dilin ön 2/3 kısmında tat algısı tamamen kayıp (Ageuzi).",
+      finding: "Dilin ön 2/3 kısmında tat azalması veya değişikliği görülebilir.",
     },
     motor: {
       intact: false,
@@ -197,9 +208,9 @@ export const TOPODIAGNOSTIC_LEVELS: TopodiagnosticLevel[] = [
       finding: "Tam hemifasiyal motor felç (Alın dahil tüm mimik kasları).",
     },
     associatedFindings:
-      "N. vestibulocochlearis (CN VIII) komşuluğu nedeniyle sensörinöral işitme kaybı, kulak çınlaması (tinnitus) ve vertigo/dengesizlik eşlik eder. (Örn: Vestibüler schwannom / Akustik nörinom).",
+      "CN VIII komşuluğu nedeniyle sensörinöral işitme kaybı, tinnitus veya vertigo eşlik edebilir. Bu birliktelik vestibüler schwannom gibi alternatif etiyolojileri düşündürür.",
     pearl:
-      "Fasiyal felce ipsilateral işitme kaybı veya vertigo eşlik ediyorsa lezyon Fallop kanalında değil, iç kulak yolunda veya CPA'dadır; acil kranial MR endikasyonudur.",
+      "Fasiyal güçsüzlüğe ipsilateral işitme kaybı, vertigo veya başka kranial sinir bulgusu eşlik ediyorsa tipik Bell paralizisi kabul edilmez; hedefli görüntüleme ve uzman değerlendirmesi düşünülür.",
   },
   {
     id: "ganglion-geniculi",
@@ -207,12 +218,7 @@ export const TOPODIAGNOSTIC_LEVELS: TopodiagnosticLevel[] = [
     nameTr: "Genikülat Gangliyon Seviyesi",
     nameLa: "Ganglion geniculi (Genu canalis facialis)",
     anatomicalSite: "Fasiyal kanalın ilk dirseği (Labirentin segment sonu)",
-    branchesLost: [
-      "N. petrosus major",
-      "N. stapedius",
-      "Chorda tympani",
-      "Terminal motor dallar",
-    ],
+    branchesLost: ["N. petrosus major", "N. stapedius", "Chorda tympani", "Terminal motor dallar"],
     lacrimation: {
       intact: false,
       test: "Schirmer Testi",
@@ -234,7 +240,7 @@ export const TOPODIAGNOSTIC_LEVELS: TopodiagnosticLevel[] = [
       finding: "Tam periferik mimik felci.",
     },
     associatedFindings:
-      "Dış kulak yolu, konka veya kulak zarında veziküller mevcutsa RAMSAY HUNT SENDROMU (Herpes Zoster Oticus) tanısı konur; şiddetli otalji eşlik eder.",
+      "Dış kulak yolu, konka veya damakta vezikül ve şiddetli otalji Ramsay Hunt sendromunu güçlü biçimde düşündürür; döküntü olmadan da zoster görülebilir.",
     pearl:
       "Ganglion geniculi lezyonunda kuru göz (kseroftalmi) en tipik ayırt edici bulgudur; çünkü N. petrosus major kanaldan çıkan ilk daldır.",
   },
@@ -244,15 +250,12 @@ export const TOPODIAGNOSTIC_LEVELS: TopodiagnosticLevel[] = [
     nameTr: "N. Stapedius Çıkışı Seviyesi",
     nameLa: "Segmentum tympanicum & mastoideum (N. stapedius)",
     anatomicalSite: "Orta kulak arka duvarı / Piramidal eminens",
-    branchesLost: [
-      "N. stapedius",
-      "Chorda tympani",
-      "Terminal motor dallar",
-    ],
+    branchesLost: ["N. stapedius", "Chorda tympani", "Terminal motor dallar"],
     lacrimation: {
       intact: true,
       test: "Schirmer Testi",
-      finding: "Normal lakrimasyon (N. petrosus major daha proksimalde ayrıldığı için korunmuştur).",
+      finding:
+        "Normal lakrimasyon (N. petrosus major daha proksimalde ayrıldığı için korunmuştur).",
     },
     stapedius: {
       intact: false,
@@ -280,10 +283,7 @@ export const TOPODIAGNOSTIC_LEVELS: TopodiagnosticLevel[] = [
     nameTr: "Chorda Tympani Seviyesi (Mastoid Segment)",
     nameLa: "Segmentum mastoideum (Canalis facialis distalis)",
     anatomicalSite: "Stilomastoid foramenin hemen öncesi",
-    branchesLost: [
-      "Chorda tympani",
-      "Terminal motor dallar",
-    ],
+    branchesLost: ["Chorda tympani", "Terminal motor dallar"],
     lacrimation: {
       intact: true,
       test: "Schirmer Testi",
@@ -292,7 +292,7 @@ export const TOPODIAGNOSTIC_LEVELS: TopodiagnosticLevel[] = [
     stapedius: {
       intact: true,
       test: "Akustik Refleks",
-      finding: "Normal stapedius refleksi (Hiperakuzi yoktur).",
+      finding: "Stapedius dalı korunur; refleks bulgusu işitmenin tamamını tek başına göstermez.",
     },
     taste: {
       intact: false,
@@ -324,7 +324,7 @@ export const TOPODIAGNOSTIC_LEVELS: TopodiagnosticLevel[] = [
     stapedius: {
       intact: true,
       test: "Akustik Refleks",
-      finding: "Tamamen normal işitme ve refleks.",
+      finding: "Fasiyal sinirin stapedius dalı bu seviyenin proksimalinde ayrıldığı için korunur.",
     },
     taste: {
       intact: true,
@@ -339,7 +339,7 @@ export const TOPODIAGNOSTIC_LEVELS: TopodiagnosticLevel[] = [
     associatedFindings:
       "Parotis bezi kitleleri, travma veya cerrahi hasarlarda tek bir terminal dal (ör. izole marjinal mandibuler dal) tutulabilir.",
     pearl:
-      "Foramen stylomastoideum sonrasındaki lezyonlarda duyu, tat, tükürük ve gözyaşı kusursuzdur; klinik sadece saf motor felçten ibarettir.",
+      "Foramen stylomastoideum sonrasındaki lezyonlarda lakrimasyon, stapedius ve chorda tympani işlevlerinin korunması beklenir; terminal dal paterni ayrıca aranır.",
   },
 ];
 
@@ -347,31 +347,47 @@ export const TOPODIAGNOSTIC_LEVELS: TopodiagnosticLevel[] = [
  * Akut Yönetim ve Göz Koruma Protokolü
  */
 export const TREATMENT_PROTOCOL = {
-  therapeuticWindow: "İlk 72 saat altın standarttır. Tedaviye ne kadar erken başlanırsa kalıcı sekelsiz iyileşme şansı o kadar artar.",
+  therapeuticWindow:
+    "Tipik, yeni başlangıçlı erişkin Bell paralizisinde oral kortikosteroidin ilk 72 saat içinde başlanması güçlü biçimde önerilir. Önce inme ve diğer sekonder nedenler değerlendirilir.",
   corticosteroids: {
-    name: "Oral Prednizolon / Metilprednizolon",
-    dose: "60 mg/gün (veya 1 mg/kg/gün) tek doz sabah aç karnına",
-    duration: "5 gün tam doz, ardından sonraki 5 gün boyunca günde 10 mg azaltılarak 10 günde kesilir.",
-    evidence: "A Seviyesi Kanıt: İnflamatuar ödemi ve Fallop kanalı içi iskemi basısını geri döndürerek kalıcı aksonal hasarı engeller.",
+    name: "Oral kortikosteroid",
+    dose: "Kılavuzlarda erişkinler için sık kullanılan örnek: prednizon/prednizolon 50–60 mg/gün.",
+    duration:
+      "Örnek rejim 5 gün tam doz ve 5 gün azaltmadır; doz, süre ve uygunluk hastaya göre belirlenir.",
+    evidence:
+      "Yeni başlangıçlı erişkin Bell paralizisinde fasiyal fonksiyonun düzelme olasılığını artırır.",
+    cautions:
+      "Diyabet, gebelik, aktif enfeksiyon, ülser riski ve diğer kontrendikasyonlar hekim tarafından değerlendirilmelidir; bu metin reçete değildir.",
   },
   antivirals: {
     name: "Valasiklovir (veya Asiklovir)",
-    regimen: "Valasiklovir 3 x 1000 mg/gün, 7 gün boyunca oral",
+    regimen: "Örnek erişkin rejimi: valasiklovir 1 g, günde 3 kez, 7 gün.",
     indications:
-      "Şiddetli paralizilerde (House-Brackmann Evre IV-VI) veya Ramsay Hunt (Herpes Zoster Oticus) şüphesinde kortikosteroid tedavisine eklenir.",
-    notes: "Hafif olgularda tek başına antiviralin steroidden üstünlüğü kanıtlanmamıştır; her zaman steroid ile kombine edilir.",
+      "Kortikosteroide eklenmesi klinik şiddet, hasta tercihi ve viral etiyoloji şüphesine göre düşünülebilir. Ek yarar küçük ve belirsizdir.",
+    notes:
+      "Antiviral tek başına önerilmez. Ramsay Hunt sendromu Bell paralizisi değildir; ayrı ve hızlı tedavi değerlendirmesi gerektirir.",
+    cautions:
+      "Böbrek işlevi, yaş, hidrasyon ve ilaç etkileşimleri değerlendirilir; böbrek yetersizliğinde doz azaltımı gerekir. Rejim hekim tarafından belirlenir.",
   },
   eyeProtection: {
-    title: "Agresif Kornea Koruma Protokolü (En Kritik Hasta Güvenliği Adımı)",
-    subheading: "Lagoftalmi nedeniyle kornea açıkta kalır; kuruma, epitel erozyonu ve kör edici kornea ülseri riski acildir.",
-    daytime: "Gündüz saat başı koruyucusuz yapay gözyaşı damlası (karboksimetilselüloz / sodyum hiyalüronat).",
-    nighttime: "Gece yatmadan önce yoğun oftalmik pomad (jel/merhem) ve şeffaf polietilen nem odacığı (moisture chamber) veya cerrahi bantla mekanik göz kapağı kapama.",
+    title: "Kornea Koruma Planı",
+    subheading:
+      "Göz tam kapanmıyorsa açıkta kalma keratopatisi gelişebilir. Koruma yoğunluğu kapanma kusuru ve oküler yüzey bulgularına göre seçilir.",
+    daytime: "Uyanıkken düzenli koruyucusuz yapay gözyaşı; rüzgâr ve tozdan fiziksel koruma.",
+    nighttime:
+      "Gece lubrikan pomad ve uygun olguda nem odacığı. Kapak bantlama tekniği korneaya temas etmeyecek biçimde sağlık profesyonelinden öğrenilmelidir.",
     measures: [
       "Rüzgarlı havalarda ve dışarıda koruyucu kenarlıklı güneş gözlüğü kullanımı.",
-      "Gözü ovuşturmaktan kesinlikle kaçınma (hissizleşmiş/kurumuş kornea kolayca epitelize olabilir).",
-      "Kırmızı göz, batma hissi ve görme bulanıklığında acil oftalmoloji değerlendirmesi.",
+      "Kontakt lens kullanmama ve gözü ovuşturmama.",
+      "Ağrı, kızarıklık, fotofobi veya görme azalmasında aynı gün oftalmoloji değerlendirmesi.",
     ],
   },
+  followUp: [
+    "Yeni ya da kötüleşen nörolojik bulguda acil yeniden değerlendirme.",
+    "Oküler yakınma veya kornea riski sürüyorsa oftalmoloji.",
+    "Üç ayda iyileşme başlamadıysa ya da seyir atipikse fasiyal sinir konusunda deneyimli uzmana yönlendirme.",
+    "Kalıcı güçsüzlük veya sinkinezide fasiyal nöromüsküler rehabilitasyon değerlendirmesi.",
+  ],
   complications: [
     {
       name: "Aberran Rejenerasyon (Sinkinezi)",
@@ -387,6 +403,29 @@ export const TREATMENT_PROTOCOL = {
     },
   ],
 };
+
+export const EVIDENCE_SOURCES = [
+  {
+    label: "Fasiyal sinir paralizisi klinik kılavuzu (2026)",
+    href: "https://pubmed.ncbi.nlm.nih.gov/42163702/",
+  },
+  {
+    label: "Japon Bell paralizisi kılavuzu, 2023 güncellemesi",
+    href: "https://pubmed.ncbi.nlm.nih.gov/39079445/",
+  },
+  {
+    label: "AAO-HNS Bell paralizisi klinik kılavuzu",
+    href: "https://pubmed.ncbi.nlm.nih.gov/24189771/",
+  },
+  {
+    label: "NICE yüz güçsüzlüğü sevk önerileri",
+    href: "https://www.nice.org.uk/guidance/ng127/chapter/recommendations-for-adults-aged-over-16#limb-or-facial-weakness-in-adults",
+  },
+] as const;
+
+export function isEyeVisuallyClosed(test: MimicTest, closure: number): boolean {
+  return test === "close-eyes" && closure > 0.8;
+}
 
 /**
  * Simülatör için yüz kasları hareket genliği ve klinik durum hesaplayıcı
@@ -433,18 +472,23 @@ export function calculateFacialState(palsyType: PalsyType, test: MimicTest): Fac
       leftForehead = 0; // Sol alın düzleşmiş!
       rightForehead = 1;
       clinicalNote = "Sol alın çizgileri tamamen silinmiştir; hasta sol kaşını kaldıramaz.";
-      anatomicalBasis = "Periferik lezyonda sinir gövdesi hasar gördüğü için alın dalı (r. temporalis) felçlidir.";
+      anatomicalBasis =
+        "Periferik lezyonda sinir gövdesi hasar gördüğü için alın dalı (r. temporalis) felçlidir.";
     } else if (test === "close-eyes") {
       leftEyeClosure = 0.25; // Lagoftalmi
       leftBell = true; // Bell fenomeni: göz yukarı kayar ve sklera görünür
-      clinicalNote = "Sol göz tam kapanamaz (Lagoftalmi). Bell fenomeni pozitiftir (göz küresi yukarı-dışa döner).";
-      anatomicalBasis = "M. orbicularis oculi periferik denervasyonu göz kapağı kapama sfinkterini felç etmiştir.";
+      clinicalNote =
+        "Sol göz tam kapanamaz (Lagoftalmi). Bell fenomeni pozitiftir (göz küresi yukarı-dışa döner).";
+      anatomicalBasis =
+        "M. orbicularis oculi periferik denervasyonu göz kapağı kapama sfinkterini felç etmiştir.";
     } else if (test === "smile") {
       leftMouth = 0;
       rightMouth = 1;
       midlineShift = 1; // Sağlam sağ tarafa kayar
-      clinicalNote = "Ağız köşesi sağlam olan sağ tarafa doğru çekilir. Sol nazolabial oluk siliktir.";
-      anatomicalBasis = "Sol m. zygomaticus ve orbicularis oris çalışmadığı için sağlam tarafın kas tonusu ağzı çeker.";
+      clinicalNote =
+        "Ağız köşesi sağlam olan sağ tarafa doğru çekilir. Sol nazolabial oluk siliktir.";
+      anatomicalBasis =
+        "Sol m. zygomaticus ve orbicularis oris çalışmadığı için sağlam tarafın kas tonusu ağzı çeker.";
     } else if (test === "puff-cheeks") {
       leftCheek = 0;
       clinicalNote = "Yanak şişirildiğinde sol ağız köşesinden hava ve tükürük kaçağı olur.";
@@ -459,17 +503,21 @@ export function calculateFacialState(palsyType: PalsyType, test: MimicTest): Fac
       rightForehead = 0; // Sağ alın silinmiş
       leftForehead = 1;
       clinicalNote = "Sağ alın çizgileri tamamen kaybolmuştur; sağ kaş düşüktür ve kalkmaz.";
-      anatomicalBasis = "Sağ periferik N. facialis gövdesi hasarlıdır; ipsilateral tüm yüz felçtir.";
+      anatomicalBasis =
+        "Sağ periferik N. facialis gövdesi hasarlıdır; ipsilateral tüm yüz felçtir.";
     } else if (test === "close-eyes") {
       rightEyeClosure = 0.25;
       rightBell = true;
-      clinicalNote = "Sağ gözde belirgin lagoftalmi ve Bell fenomeni (göz bebeği yukarı yuvarlanır).";
-      anatomicalBasis = "M. orbicularis oculi innervasyonu kaybolmuştur; kornea kuruma riski yüksektir.";
+      clinicalNote =
+        "Sağ gözde belirgin lagoftalmi ve Bell fenomeni (göz bebeği yukarı yuvarlanır).";
+      anatomicalBasis =
+        "M. orbicularis oculi innervasyonu kaybolmuştur; kornea kuruma riski yüksektir.";
     } else if (test === "smile") {
       rightMouth = 0;
       leftMouth = 1;
       midlineShift = -1; // Sağlam sol tarafa kayar
-      clinicalNote = "Gülümsemede ağız sağlam sol tarafa doğru sapar; sağ ağız köşesi hareketsizdir.";
+      clinicalNote =
+        "Gülümsemede ağız sağlam sol tarafa doğru sapar; sağ ağız köşesi hareketsizdir.";
       anatomicalBasis = "Sağ mimik kasları hareketsiz olduğundan sol mimik kasları ağzı çeker.";
     } else if (test === "puff-cheeks") {
       rightCheek = 0;
@@ -485,22 +533,26 @@ export function calculateFacialState(palsyType: PalsyType, test: MimicTest): Fac
       leftForehead = 0.95; // ALIN KORUNUR!
       rightForehead = 1;
       clinicalNote = "ALIN KORUNMUŞTUR! Hasta her iki alnını da simetrik olarak kırıştırabilir.";
-      anatomicalBasis = "Fasiyal motor çekirdeğin üst yüz (alın) kısmı her iki serebral hemisferden (bilateral) innervasyon alır!";
+      anatomicalBasis =
+        "Fasiyal motor çekirdeğin üst yüz (alın) kısmı her iki serebral hemisferden (bilateral) innervasyon alır!";
     } else if (test === "close-eyes") {
       leftEyeClosure = 0.9; // Göz kapanması korunur veya çok hafif zayıftır
       leftBell = false;
       clinicalNote = "Göz kapanması korunmuştur; lagoftalmi veya Bell fenomeni izlenmez.";
-      anatomicalBasis = "Orbicularis oculi üst lifleri bilateral kortikal temsile sahiptir; göz kapanması sağlam kalır.";
+      anatomicalBasis =
+        "Orbicularis oculi üst lifleri bilateral kortikal temsile sahiptir; göz kapanması sağlam kalır.";
     } else if (test === "smile") {
       leftMouth = 0.1;
       rightMouth = 1;
       midlineShift = 1; // Sağlam sağ tarafa sapar
       clinicalNote = "Sol alt yüz felçlidir; ağız köşesi sağlam sağ tarafa çekilir.";
-      anatomicalBasis = "Fasiyal motor çekirdeğin alt yüz kısmı sadece karşı korteksten lif alır; bu nedenle izole alt yüz felci oluşur.";
+      anatomicalBasis =
+        "Fasiyal motor çekirdeğin alt yüz kısmı sadece karşı korteksten lif alır; bu nedenle izole alt yüz felci oluşur.";
     } else if (test === "puff-cheeks") {
       leftCheek = 0.2;
       clinicalNote = "Sol alt dudak ve yanakta hava kaçağı olabilir ancak alın tamamen normaldir.";
-      anatomicalBasis = "İnme (SVO) şüphesi: Hastanın kol/bacak kuvveti ve konuşması (afazi) acilen taranmalıdır!";
+      anatomicalBasis =
+        "Santral patern şüphesinde kol-bacak kuvveti, konuşma, göz hareketleri ve denge acilen değerlendirilir.";
     }
   } else if (palsyType === "central-right") {
     // Sağ Santral Fasiyal Paralizi (Sol Korteks / İnme lezyonu)
@@ -511,7 +563,8 @@ export function calculateFacialState(palsyType: PalsyType, test: MimicTest): Fac
       rightForehead = 0.95; // ALIN KORUNUR!
       leftForehead = 1;
       clinicalNote = "ALIN KORUNMUŞTUR! Hasta kaşlarını kaldırıp alnını simetrik kırıştırabilir.";
-      anatomicalBasis = "Alın motor nöronları bilateral kortikobulbar girdi aldığı için sağlam sol korteks sağ alnı korur.";
+      anatomicalBasis =
+        "Alın motor nöronları bilateral kortikobulbar girdi aldığı için sağlam sol korteks sağ alnı korur.";
     } else if (test === "close-eyes") {
       rightEyeClosure = 0.9;
       rightBell = false;
@@ -522,11 +575,12 @@ export function calculateFacialState(palsyType: PalsyType, test: MimicTest): Fac
       leftMouth = 1;
       midlineShift = -1; // Sağlam sol tarafa sapar
       clinicalNote = "Sağ nazolabial oluk siliktir; ağız sağlam sol tarafa çekilir.";
-      anatomicalBasis = "Kontralateral motor korteks hasarı alt yüz mimik kaslarında izole zaafiyet yaratır.";
+      anatomicalBasis =
+        "Kontralateral motor korteks hasarı alt yüz mimik kaslarında izole zaafiyet yaratır.";
     } else if (test === "puff-cheeks") {
       rightCheek = 0.2;
       clinicalNote = "Sağ yanak tonusu azalmıştır, alın ve göz kasları sağlamdır.";
-      anatomicalBasis = "İnme (SVO) alarm bulgusu: Acil nöroloji konsültasyonu ve difüzyon MR gerekir.";
+      anatomicalBasis = "Ani santral patern inme alarmıdır; acil inme değerlendirmesi gerekir.";
     }
   }
 

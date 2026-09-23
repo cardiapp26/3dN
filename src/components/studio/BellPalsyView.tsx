@@ -15,8 +15,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  BELL_PALSY_SAFETY,
   calculateFacialState,
+  EVIDENCE_SOURCES,
   HOUSE_BRACKMANN_GRADES,
+  HOUSE_BRACKMANN_NOTE,
   TOPODIAGNOSTIC_LEVELS,
   TREATMENT_PROTOCOL,
   type HouseBrackmannGrade,
@@ -25,6 +28,7 @@ import {
 } from "@/lib/bell-palsy";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
+import { FacialNerveAtlas } from "./FacialNerveAtlas";
 
 type BellTab = "simulator" | "grading" | "topodiagnostics" | "protocol";
 
@@ -58,10 +62,12 @@ export function BellPalsyView() {
             <Badge tone="mixed">CN VII · N. Facialis</Badge>
           </div>
           <h1 className="latin mt-1 text-2xl font-semibold text-fg md:text-3xl">
-            Bell Paralizisi <span className="text-muted text-lg font-normal">/ Paralysis Facialis</span>
+            Bell Paralizisi{" "}
+            <span className="text-muted text-lg font-normal">/ Paralysis Facialis</span>
           </h1>
           <p className="mt-1 text-xs text-muted md:text-sm">
-            N. facialis'in akut periferik lezyonu, santral inme ayrımı, House-Brackmann evrelemesi ve acil tedavi protokolü.
+            Akut fasiyal güçsüzlük paterni, güvenlik ağı, House-Brackmann evrelemesi ve kanıta
+            dayalı ilk yaklaşım.
           </p>
         </div>
 
@@ -79,9 +85,13 @@ export function BellPalsyView() {
       </div>
 
       {/* Alt Sekmeler */}
-      <div className="mb-6 flex flex-wrap gap-1 rounded-xl bg-surface p-1 shadow-[var(--shadow-border)]">
+      <nav
+        aria-label="Bell paralizisi modül bölümleri"
+        className="mb-6 flex flex-wrap gap-1 rounded-xl bg-surface p-1 shadow-[var(--shadow-border)]"
+      >
         <button
           type="button"
+          aria-pressed={activeTab === "simulator"}
           onClick={() => setActiveTab("simulator")}
           className={cn(
             "flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all md:text-sm",
@@ -91,17 +101,16 @@ export function BellPalsyView() {
           )}
         >
           <Smile className="size-4 text-gold" />
-          <span>Yüz Simülatörü & Tanı</span>
+          <span>Fasiyal Patern & Tanı</span>
         </button>
 
         <button
           type="button"
+          aria-pressed={activeTab === "grading"}
           onClick={() => setActiveTab("grading")}
           className={cn(
             "flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all md:text-sm",
-            activeTab === "grading"
-              ? "bg-surface-2 text-fg shadow-sm"
-              : "text-muted hover:text-fg",
+            activeTab === "grading" ? "bg-surface-2 text-fg shadow-sm" : "text-muted hover:text-fg",
           )}
         >
           <Activity className="size-4 text-gold" />
@@ -110,6 +119,7 @@ export function BellPalsyView() {
 
         <button
           type="button"
+          aria-pressed={activeTab === "topodiagnostics"}
           onClick={() => setActiveTab("topodiagnostics")}
           className={cn(
             "flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all md:text-sm",
@@ -124,6 +134,7 @@ export function BellPalsyView() {
 
         <button
           type="button"
+          aria-pressed={activeTab === "protocol"}
           onClick={() => setActiveTab("protocol")}
           className={cn(
             "flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all md:text-sm",
@@ -135,19 +146,27 @@ export function BellPalsyView() {
           <ShieldAlert className="size-4 text-gold" />
           <span>Akut Tedavi & Göz Koruma</span>
         </button>
-      </div>
+      </nav>
 
       {/* SEKME 1: YÜZ SİMÜLATÖRÜ & SANTRAL VS PERİFERİK */}
       {activeTab === "simulator" && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_1fr]">
+        <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_1fr]">
           {/* Sol Kolon: Simülatör Tuvali */}
           <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <p className="eyebrow">İnteraktif Mimik Modeli</p>
+                <p className="eyebrow">İnteraktif CN VII Atlası</p>
                 <h3 className="latin text-lg text-fg">{facialState.summaryHeading}</h3>
               </div>
-              <Badge tone={palsyType.startsWith("bell") ? "motor" : palsyType.startsWith("central") ? "mixed" : "sensory"}>
+              <Badge
+                tone={
+                  palsyType.startsWith("bell")
+                    ? "motor"
+                    : palsyType.startsWith("central")
+                      ? "mixed"
+                      : "sensory"
+                }
+              >
                 {palsyType === "normal"
                   ? "Fizyolojik"
                   : palsyType.startsWith("bell")
@@ -156,9 +175,9 @@ export function BellPalsyView() {
               </Badge>
             </div>
 
-            {/* SVG Tabanlı Dinamik Yüz Görseli */}
-            <div className="relative mx-auto flex aspect-square w-full max-w-[340px] items-center justify-center rounded-2xl bg-bg/80 p-4 shadow-inner">
-              <FacialCanvas state={facialState} palsy={palsyType} test={mimicTest} />
+            {/* Kranial sinir atlasından CN VII görünümü */}
+            <div className="mx-auto w-full max-w-[520px]">
+              <FacialNerveAtlas state={facialState} palsy={palsyType} test={mimicTest} />
             </div>
 
             {/* Lezyon Tipi Seçimi */}
@@ -179,7 +198,10 @@ export function BellPalsyView() {
                   size="sm"
                   variant={palsyType === "bell-left" ? "default" : "outline"}
                   onClick={() => setPalsyType("bell-left")}
-                  className={cn("text-xs", palsyType === "bell-left" && "bg-amber-600 hover:bg-amber-700")}
+                  className={cn(
+                    "text-xs",
+                    palsyType === "bell-left" && "bg-amber-600 hover:bg-amber-700",
+                  )}
                 >
                   Sol Bell (Periferik)
                 </Button>
@@ -187,7 +209,10 @@ export function BellPalsyView() {
                   size="sm"
                   variant={palsyType === "bell-right" ? "default" : "outline"}
                   onClick={() => setPalsyType("bell-right")}
-                  className={cn("text-xs", palsyType === "bell-right" && "bg-amber-600 hover:bg-amber-700")}
+                  className={cn(
+                    "text-xs",
+                    palsyType === "bell-right" && "bg-amber-600 hover:bg-amber-700",
+                  )}
                 >
                   Sağ Bell (Periferik)
                 </Button>
@@ -195,17 +220,23 @@ export function BellPalsyView() {
                   size="sm"
                   variant={palsyType === "central-left" ? "default" : "outline"}
                   onClick={() => setPalsyType("central-left")}
-                  className={cn("text-xs", palsyType === "central-left" && "bg-rose-700 hover:bg-rose-800")}
+                  className={cn(
+                    "text-xs",
+                    palsyType === "central-left" && "bg-rose-700 hover:bg-rose-800",
+                  )}
                 >
-                  Sol Santral (İnme)
+                  Sol Santral Patern
                 </Button>
                 <Button
                   size="sm"
                   variant={palsyType === "central-right" ? "default" : "outline"}
                   onClick={() => setPalsyType("central-right")}
-                  className={cn("text-xs", palsyType === "central-right" && "bg-rose-700 hover:bg-rose-800")}
+                  className={cn(
+                    "text-xs",
+                    palsyType === "central-right" && "bg-rose-700 hover:bg-rose-800",
+                  )}
                 >
-                  Sağ Santral (İnme)
+                  Sağ Santral Patern
                 </Button>
               </div>
             </div>
@@ -215,12 +246,15 @@ export function BellPalsyView() {
               <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">
                 2. Test Edilen Mimik Fonksiyonu:
               </p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Button
                   size="sm"
                   variant={mimicTest === "wrinkle-forehead" ? "secondary" : "ghost"}
                   onClick={() => setMimicTest("wrinkle-forehead")}
-                  className={cn("justify-start gap-2 border border-border text-xs", mimicTest === "wrinkle-forehead" && "border-gold text-gold")}
+                  className={cn(
+                    "h-auto min-h-8 justify-start gap-2 whitespace-normal border border-border text-xs",
+                    mimicTest === "wrinkle-forehead" && "border-gold text-gold",
+                  )}
                 >
                   <span className="font-semibold">Alın Kırıştırma</span>
                   <span className="text-[10px] text-muted">(M. frontalis)</span>
@@ -229,7 +263,10 @@ export function BellPalsyView() {
                   size="sm"
                   variant={mimicTest === "close-eyes" ? "secondary" : "ghost"}
                   onClick={() => setMimicTest("close-eyes")}
-                  className={cn("justify-start gap-2 border border-border text-xs", mimicTest === "close-eyes" && "border-gold text-gold")}
+                  className={cn(
+                    "h-auto min-h-8 justify-start gap-2 whitespace-normal border border-border text-xs",
+                    mimicTest === "close-eyes" && "border-gold text-gold",
+                  )}
                 >
                   <span className="font-semibold">Göz Kapatma</span>
                   <span className="text-[10px] text-muted">(M. orbicularis oculi)</span>
@@ -238,7 +275,10 @@ export function BellPalsyView() {
                   size="sm"
                   variant={mimicTest === "smile" ? "secondary" : "ghost"}
                   onClick={() => setMimicTest("smile")}
-                  className={cn("justify-start gap-2 border border-border text-xs", mimicTest === "smile" && "border-gold text-gold")}
+                  className={cn(
+                    "h-auto min-h-8 justify-start gap-2 whitespace-normal border border-border text-xs",
+                    mimicTest === "smile" && "border-gold text-gold",
+                  )}
                 >
                   <span className="font-semibold">Gülümseme</span>
                   <span className="text-[10px] text-muted">(M. zygomaticus)</span>
@@ -247,7 +287,10 @@ export function BellPalsyView() {
                   size="sm"
                   variant={mimicTest === "puff-cheeks" ? "secondary" : "ghost"}
                   onClick={() => setMimicTest("puff-cheeks")}
-                  className={cn("justify-start gap-2 border border-border text-xs", mimicTest === "puff-cheeks" && "border-gold text-gold")}
+                  className={cn(
+                    "h-auto min-h-8 justify-start gap-2 whitespace-normal border border-border text-xs",
+                    mimicTest === "puff-cheeks" && "border-gold text-gold",
+                  )}
                 >
                   <span className="font-semibold">Yanak Şişirme</span>
                   <span className="text-[10px] text-muted">(M. buccinator)</span>
@@ -258,6 +301,20 @@ export function BellPalsyView() {
 
           {/* Sağ Kolon: Klinik ve Anatomik Açıklama */}
           <div className="flex flex-col gap-4">
+            <div className="rounded-xl border border-rose-500/40 bg-rose-500/5 p-5">
+              <div className="flex items-center gap-2 text-rose-400">
+                <ShieldAlert className="size-4" />
+                <h4 className="text-balance font-display text-base font-semibold">
+                  Önce Acili Dışla
+                </h4>
+              </div>
+              <p className="mt-2 text-pretty text-xs leading-relaxed text-fg/90">
+                Ani yüz güçsüzlüğü inme belirtisi olabilir. Kol-bacak güçsüzlüğü, konuşma bozukluğu,
+                çift görme, belirgin dengesizlik veya yeni şiddetli baş ağrısı varsa acil
+                değerlendirme gerekir.
+              </p>
+            </div>
+
             {/* Canlı Test Bulgusu */}
             <div className="rounded-xl border border-border bg-surface p-5">
               <div className="flex items-center gap-2 text-gold">
@@ -271,37 +328,40 @@ export function BellPalsyView() {
               </p>
             </div>
 
-            {/* Altın Kural: Santral vs Periferik Farkı */}
+            {/* Santral ve periferik patern ayrımı */}
             <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5">
               <div className="flex items-center gap-2 text-amber-400">
                 <AlertTriangle className="size-4.5" />
                 <h4 className="font-display text-base font-semibold">
-                  Altın Kural: Alın Tutulumu İlkesi
+                  Lokalizasyon İpucu, Tanı Kuralı Değil
                 </h4>
               </div>
               <div className="mt-3 space-y-3 text-xs leading-relaxed text-muted">
                 <div className="rounded-lg bg-surface/80 p-3">
-                  <p className="font-semibold text-fg">
-                    Periferik Felç (Bell Paralizisi / LMN):
-                  </p>
+                  <p className="font-semibold text-fg">Periferik Felç (Bell Paralizisi / LMN):</p>
                   <p className="mt-0.5">
                     N. facialis ana gövdesi veya nükleusu hasar gördüğü için{" "}
-                    <span className="font-semibold text-amber-300">alın dahil tüm hemifasiyal kaslar</span> felçtir.
-                    Hasta kaşını kaldıramaz, alnını kırıştıramaz ve gözünü kapatamaz (Bell fenomeni).
+                    <span className="font-semibold text-amber-300">
+                      alın dahil tüm hemifasiyal kaslar
+                    </span>{" "}
+                    felçtir. Hasta kaşını kaldıramaz, alnını kırıştıramaz ve gözünü kapatamaz (Bell
+                    fenomeni).
                   </p>
                 </div>
                 <div className="rounded-lg bg-surface/80 p-3">
-                  <p className="font-semibold text-fg">
-                    Santral Felç (İnme / UMN):
-                  </p>
+                  <p className="font-semibold text-fg">Santral Felç (İnme / UMN):</p>
                   <p className="mt-0.5">
                     Fasiyal motor çekirdeğin üst yüz (alın) temsil alanı{" "}
                     <span className="font-semibold text-emerald-400">
                       her iki serebral hemisferden (bilateral kortikobulbar yol)
                     </span>{" "}
-                    lif alır. Bu nedenle tek taraflı kortikal lezyonda karşı taraf alın kırıştırma ve göz kapama korunur; felç yalnızca alt yüze sınırlıdır.
+                    lif alır. Bu nedenle tek taraflı kortikal lezyonda karşı taraf alın kırıştırma
+                    ve göz kapama korunur; felç yalnızca alt yüze sınırlıdır.
                   </p>
                 </div>
+                <p className="text-pretty font-medium text-amber-200">
+                  {BELL_PALSY_SAFETY.patternWarning}
+                </p>
               </div>
             </div>
 
@@ -312,16 +372,24 @@ export function BellPalsyView() {
                 <h4 className="font-display text-base font-semibold">Bell Fenomeni Nedir?</h4>
               </div>
               <p className="mt-2 text-xs leading-relaxed text-muted">
-                Kişi gözlerini kapatmaya çalıştığında göz küresinin istemsiz olarak yukarı ve dışa doğru dönmesi fizyolojik bir savunma refleksidir. Normal kişilerde göz kapağı kapandığı için bu hareket görülmez. Bell paralizisinde <i>m. orbicularis oculi</i> felcine bağlı göz açık kaldığından (lagoftalmi), skleranın beyaz kısmı dramatik şekilde görünür hale gelir.
+                Kişi gözlerini kapatmaya çalıştığında göz küresinin istemsiz olarak yukarı ve dışa
+                doğru dönmesi fizyolojik bir savunma refleksidir. Normal kişilerde göz kapağı
+                kapandığı için bu hareket görülmez. Bell paralizisinde <i>m. orbicularis oculi</i>{" "}
+                felcine bağlı göz açık kaldığından (lagoftalmi), skleranın beyaz kısmı dramatik
+                şekilde görünür hale gelir.
               </p>
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       {/* SEKME 2: HOUSE-BRACKMANN EVRELEME SKORU */}
       {activeTab === "grading" && (
-        <div className="space-y-6">
+        <section className="space-y-6">
+          <div className="rounded-xl border border-border bg-surface p-4 text-pretty text-xs leading-relaxed text-muted">
+            <span className="font-semibold text-fg">Ölçeğin sınırı: </span>
+            {HOUSE_BRACKMANN_NOTE}
+          </div>
           {/* Evre Seçici Düğmeler */}
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
             {([1, 2, 3, 4, 5, 6] as HouseBrackmannGrade[]).map((grade) => {
@@ -331,6 +399,7 @@ export function BellPalsyView() {
                 <button
                   key={grade}
                   type="button"
+                  aria-pressed={isSelected}
                   onClick={() => setSelectedGrade(grade)}
                   className={cn(
                     "flex flex-col items-start rounded-xl border p-4 text-left transition-all",
@@ -341,7 +410,7 @@ export function BellPalsyView() {
                 >
                   <span className="font-display text-2xl font-bold text-gold">{item.roman}</span>
                   <span className="mt-1 text-xs font-semibold text-fg">{item.title}</span>
-                  <span className="mt-0.5 line-clamp-2 text-[11px] text-muted">{item.recoveryRate}</span>
+                  <span className="mt-0.5 line-clamp-2 text-[11px] text-muted">{item.summary}</span>
                 </button>
               );
             })}
@@ -352,7 +421,9 @@ export function BellPalsyView() {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <Badge tone={selectedGrade <= 2 ? "sensory" : selectedGrade <= 4 ? "mixed" : "motor"}>
+                  <Badge
+                    tone={selectedGrade <= 2 ? "sensory" : selectedGrade <= 4 ? "mixed" : "motor"}
+                  >
                     Evre {gradeInfo.roman}
                   </Badge>
                   <span className="latin text-xs text-muted">{gradeInfo.latinTitle}</span>
@@ -360,9 +431,11 @@ export function BellPalsyView() {
                 <h3 className="latin mt-1 text-2xl font-semibold text-fg">{gradeInfo.title}</h3>
                 <p className="mt-1 text-sm text-muted">{gradeInfo.summary}</p>
               </div>
-              <div className="rounded-xl border border-gold/30 bg-gold/5 px-4 py-3 text-right">
-                <p className="eyebrow text-gold">Spontan İyileşme Beklentisi</p>
-                <p className="font-display text-lg font-bold text-fg">{gradeInfo.recoveryRate}</p>
+              <div className="max-w-sm rounded-xl border border-gold/30 bg-gold/5 px-4 py-3">
+                <p className="eyebrow text-gold">Klinik Odak</p>
+                <p className="mt-1 text-pretty text-xs font-medium leading-relaxed text-fg">
+                  {gradeInfo.clinicalFocus}
+                </p>
               </div>
             </div>
 
@@ -388,20 +461,24 @@ export function BellPalsyView() {
                 <p className="mt-2 text-sm text-fg">{gradeInfo.synkinesis}</p>
               </div>
               <div className="rounded-xl border border-border bg-bg/50 p-4">
-                <p className="eyebrow text-gold">Önerilen Klinik Yaklaşım</p>
-                <p className="mt-2 text-sm text-fg">{gradeInfo.management}</p>
+                <p className="eyebrow text-gold">Evreleme Notu</p>
+                <p className="mt-2 text-pretty text-sm text-fg">
+                  Prognoz; başlangıç şiddeti yanında yaş, etiyoloji, komorbiditeler ve seri
+                  muayeneye bağlıdır.
+                </p>
               </div>
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       {/* SEKME 3: TOPODİAGNOSTİK LOKALİZASYON */}
       {activeTab === "topodiagnostics" && (
-        <div className="space-y-6">
+        <section className="space-y-6">
           <div className="rounded-xl border border-border bg-surface p-4 text-xs text-muted">
             <span className="font-semibold text-fg">Topodiagnostik İlke: </span>
-            Canalis facialis boyunca ayrılan dalların (N. petrosus major, N. stapedius, Chorda tympani) fonksiyonel kaybı lezyonun anatomik seviyesini kesinleştirir.
+            Canalis facialis boyunca ayrılan dalların bulguları anatomik seviyeyi destekleyebilir;
+            tek bir test lokalizasyonu kesinleştirmez.
           </div>
 
           {/* Seviye Seçim Şeridi */}
@@ -412,6 +489,7 @@ export function BellPalsyView() {
                 <button
                   key={level.id}
                   type="button"
+                  aria-pressed={isSelected}
                   onClick={() => setSelectedLevelId(level.id)}
                   className={cn(
                     "flex flex-1 flex-col rounded-xl border p-3 text-left transition-all",
@@ -421,9 +499,13 @@ export function BellPalsyView() {
                   )}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-display text-sm font-bold text-gold">Seviye {level.order}</span>
+                    <span className="font-display text-sm font-bold text-gold">
+                      Seviye {level.order}
+                    </span>
                   </div>
-                  <span className="mt-1 line-clamp-1 text-xs font-semibold text-fg">{level.nameTr}</span>
+                  <span className="mt-1 line-clamp-1 text-xs font-semibold text-fg">
+                    {level.nameTr}
+                  </span>
                 </button>
               );
             })}
@@ -432,7 +514,9 @@ export function BellPalsyView() {
           {/* Seçili Seviyenin Teşhis Matrisi */}
           <div className="rounded-2xl border border-border bg-surface p-6">
             <div className="border-b border-border pb-4">
-              <span className="eyebrow text-gold">Seviye {levelInfo.order} · Anatomik Lokalizasyon</span>
+              <span className="eyebrow text-gold">
+                Seviye {levelInfo.order} · Anatomik Lokalizasyon
+              </span>
               <h3 className="latin text-2xl font-semibold text-fg">{levelInfo.nameTr}</h3>
               <p className="latin text-xs text-muted">{levelInfo.nameLa}</p>
               <p className="mt-2 text-xs text-fg/80">
@@ -446,7 +530,9 @@ export function BellPalsyView() {
               {/* Schirmer Testi */}
               <div className="rounded-xl border border-border bg-bg/60 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase text-muted">Schirmer (Lakrimasyon)</span>
+                  <span className="text-xs font-semibold uppercase text-muted">
+                    Schirmer (Lakrimasyon)
+                  </span>
                   {levelInfo.lacrimation.intact ? (
                     <CheckCircle2 className="size-4 text-emerald-400" />
                   ) : (
@@ -462,7 +548,9 @@ export function BellPalsyView() {
               {/* Akustik Stapedius Refleksi */}
               <div className="rounded-xl border border-border bg-bg/60 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase text-muted">Stapedius (Hiperakuzi)</span>
+                  <span className="text-xs font-semibold uppercase text-muted">
+                    Stapedius (Hiperakuzi)
+                  </span>
                   {levelInfo.stapedius.intact ? (
                     <CheckCircle2 className="size-4 text-emerald-400" />
                   ) : (
@@ -470,7 +558,9 @@ export function BellPalsyView() {
                   )}
                 </div>
                 <p className="mt-2 text-sm font-semibold text-fg">
-                  {levelInfo.stapedius.intact ? "İşitme Refleksi Normal" : "Hiperakuzi Mevcut"}
+                  {levelInfo.stapedius.intact
+                    ? "Stapedius Dalı Korunmuş"
+                    : "Stapedius Dalı Etkilenmiş"}
                 </p>
                 <p className="mt-1 text-xs text-muted">{levelInfo.stapedius.finding}</p>
               </div>
@@ -478,7 +568,9 @@ export function BellPalsyView() {
               {/* Tat Duyusu */}
               <div className="rounded-xl border border-border bg-bg/60 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase text-muted">Tat (Dil Ön 2/3)</span>
+                  <span className="text-xs font-semibold uppercase text-muted">
+                    Tat (Dil Ön 2/3)
+                  </span>
                   {levelInfo.taste.intact ? (
                     <CheckCircle2 className="size-4 text-emerald-400" />
                   ) : (
@@ -506,7 +598,9 @@ export function BellPalsyView() {
             <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div className="rounded-xl border border-border bg-surface-2/60 p-4">
                 <p className="eyebrow text-gold">Eşlik Eden Klinik Bulgular</p>
-                <p className="mt-1 text-xs leading-relaxed text-fg/90">{levelInfo.associatedFindings}</p>
+                <p className="mt-1 text-xs leading-relaxed text-fg/90">
+                  {levelInfo.associatedFindings}
+                </p>
               </div>
               <div className="rounded-xl border border-gold/30 bg-gold/5 p-4">
                 <p className="eyebrow text-gold">Klinik İnci (Diagnostic Pearl)</p>
@@ -514,12 +608,39 @@ export function BellPalsyView() {
               </div>
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       {/* SEKME 4: AKUT TEDAVİ & GÖZ KORUMA PROTOKOLÜ */}
       {activeTab === "protocol" && (
-        <div className="space-y-6">
+        <section className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="rounded-xl border border-rose-500/40 bg-rose-500/5 p-4">
+              <div className="flex items-center gap-2 text-rose-400">
+                <ShieldAlert className="size-4" />
+                <h3 className="text-balance font-display text-base font-semibold">
+                  Acil Alarm Bulguları
+                </h3>
+              </div>
+              <ul className="mt-3 list-disc space-y-1.5 pl-4 text-pretty text-xs leading-relaxed text-fg/90">
+                {BELL_PALSY_SAFETY.emergencySigns.map((sign) => (
+                  <li key={sign}>{sign}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+              <div className="flex items-center gap-2 text-amber-300">
+                <AlertTriangle className="size-4" />
+                <h3 className="text-balance font-display text-base font-semibold">Atipik Seyir</h3>
+              </div>
+              <ul className="mt-3 list-disc space-y-1.5 pl-4 text-pretty text-xs leading-relaxed text-fg/90">
+                {BELL_PALSY_SAFETY.atypicalFeatures.map((feature) => (
+                  <li key={feature}>{feature}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
           {/* Kritik Pencere Uyarısı */}
           <div className="flex items-start gap-3 rounded-xl border border-gold/40 bg-gold/10 p-4">
             <Clock className="mt-0.5 size-5 shrink-0 text-gold" />
@@ -534,14 +655,18 @@ export function BellPalsyView() {
             <div className="space-y-4 rounded-xl border border-border bg-surface p-5">
               <div className="flex items-center gap-2 border-b border-border pb-3">
                 <Stethoscope className="size-4.5 text-gold" />
-                <h3 className="font-display text-lg font-semibold text-fg">İlaç Tedavi Protokolü</h3>
+                <h3 className="text-balance font-display text-lg font-semibold text-fg">
+                  Kanıta Dayalı Farmakolojik Yaklaşım
+                </h3>
               </div>
 
               {/* Kortikosteroid */}
               <div className="rounded-lg border border-border bg-bg/60 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-fg">{TREATMENT_PROTOCOL.corticosteroids.name}</span>
-                  <Badge tone="mixed">A Seviye Kanıt</Badge>
+                  <span className="font-semibold text-fg">
+                    {TREATMENT_PROTOCOL.corticosteroids.name}
+                  </span>
+                  <Badge tone="mixed">Güçlü Öneri</Badge>
                 </div>
                 <div className="mt-2 space-y-1 text-xs text-muted">
                   <p>
@@ -553,14 +678,19 @@ export function BellPalsyView() {
                     {TREATMENT_PROTOCOL.corticosteroids.duration}
                   </p>
                   <p className="mt-1 text-fg/80">{TREATMENT_PROTOCOL.corticosteroids.evidence}</p>
+                  <p className="mt-2 rounded-md border border-amber-500/20 bg-amber-500/5 p-2 text-[11px] text-amber-100/80">
+                    {TREATMENT_PROTOCOL.corticosteroids.cautions}
+                  </p>
                 </div>
               </div>
 
               {/* Antiviral */}
               <div className="rounded-lg border border-border bg-bg/60 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-fg">{TREATMENT_PROTOCOL.antivirals.name}</span>
-                  <Badge tone="sensory">Kombine Endikasyon</Badge>
+                  <span className="font-semibold text-fg">
+                    {TREATMENT_PROTOCOL.antivirals.name}
+                  </span>
+                  <Badge tone="sensory">İsteğe Bağlı Ek</Badge>
                 </div>
                 <div className="mt-2 space-y-1 text-xs text-muted">
                   <p>
@@ -571,17 +701,22 @@ export function BellPalsyView() {
                     <span className="font-medium text-fg">Endikasyon: </span>
                     {TREATMENT_PROTOCOL.antivirals.indications}
                   </p>
-                  <p className="mt-1 text-[11px] text-muted">{TREATMENT_PROTOCOL.antivirals.notes}</p>
+                  <p className="mt-1 text-[11px] text-muted">
+                    {TREATMENT_PROTOCOL.antivirals.notes}
+                  </p>
+                  <p className="mt-2 rounded-md border border-amber-500/20 bg-amber-500/5 p-2 text-[11px] text-amber-100/80">
+                    {TREATMENT_PROTOCOL.antivirals.cautions}
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Agresif Kornea Koruma Protokolü */}
+            {/* Kornea koruma planı */}
             <div className="space-y-4 rounded-xl border border-rose-500/30 bg-surface p-5">
               <div className="flex items-center gap-2 border-b border-border pb-3 text-rose-400">
                 <Eye className="size-4.5" />
-                <h3 className="font-display text-lg font-semibold text-fg">
-                  Agresif Kornea Koruma Protokolü
+                <h3 className="text-balance font-display text-lg font-semibold text-fg">
+                  {TREATMENT_PROTOCOL.eyeProtection.title}
                 </h3>
               </div>
               <p className="text-xs text-muted">{TREATMENT_PROTOCOL.eyeProtection.subheading}</p>
@@ -589,12 +724,16 @@ export function BellPalsyView() {
               <div className="space-y-3">
                 <div className="rounded-lg border border-border bg-bg/60 p-3">
                   <p className="font-semibold text-xs text-gold">Gündüz Rejimi</p>
-                  <p className="mt-1 text-xs text-fg/90">{TREATMENT_PROTOCOL.eyeProtection.daytime}</p>
+                  <p className="mt-1 text-xs text-fg/90">
+                    {TREATMENT_PROTOCOL.eyeProtection.daytime}
+                  </p>
                 </div>
 
                 <div className="rounded-lg border border-border bg-bg/60 p-3">
                   <p className="font-semibold text-xs text-gold">Gece Rejimi</p>
-                  <p className="mt-1 text-xs text-fg/90">{TREATMENT_PROTOCOL.eyeProtection.nighttime}</p>
+                  <p className="mt-1 text-xs text-fg/90">
+                    {TREATMENT_PROTOCOL.eyeProtection.nighttime}
+                  </p>
                 </div>
 
                 <div className="rounded-lg border border-border bg-bg/60 p-3">
@@ -609,206 +748,56 @@ export function BellPalsyView() {
             </div>
           </div>
 
-          {/* Geç Komplikasyonlar */}
-          <div className="rounded-xl border border-border bg-surface p-5">
-            <h4 className="font-display text-base font-semibold text-fg">
-              Geç Dönem Sekelleri ve Aberran Rejenerasyon
-            </h4>
-            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
-              {TREATMENT_PROTOCOL.complications.map((c, i) => (
-                <div key={i} className="rounded-lg border border-border bg-bg/50 p-3">
-                  <p className="text-xs font-semibold text-gold">{c.name}</p>
-                  <p className="mt-1 text-[11px] leading-relaxed text-muted">{c.desc}</p>
-                </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
+            {/* Geç Komplikasyonlar */}
+            <div className="rounded-xl border border-border bg-surface p-5">
+              <h4 className="text-balance font-display text-base font-semibold text-fg">
+                Geç Dönem Sekelleri ve Aberran Rejenerasyon
+              </h4>
+              <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+                {TREATMENT_PROTOCOL.complications.map((c) => (
+                  <div key={c.name} className="rounded-lg border border-border bg-bg/50 p-3">
+                    <p className="text-xs font-semibold text-gold">{c.name}</p>
+                    <p className="mt-1 text-pretty text-[11px] leading-relaxed text-muted">
+                      {c.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-surface p-5">
+              <h4 className="text-balance font-display text-base font-semibold text-fg">
+                İzlem Eşikleri
+              </h4>
+              <ul className="mt-3 list-disc space-y-2 pl-4 text-pretty text-xs leading-relaxed text-muted">
+                {TREATMENT_PROTOCOL.followUp.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border bg-surface p-4">
+            <p className="text-pretty text-xs font-medium text-fg">
+              {BELL_PALSY_SAFETY.disclaimer}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+              {EVIDENCE_SOURCES.map((source) => (
+                <a
+                  key={source.href}
+                  href={source.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-gold underline-offset-4 hover:underline"
+                >
+                  {source.label}
+                </a>
               ))}
             </div>
           </div>
-        </div>
+        </section>
       )}
     </div>
-  );
-}
-
-/**
- * Dinamik SVG Yüz Görselleştiricisi
- */
-function FacialCanvas({
-  state,
-  palsy,
-  test,
-}: {
-  state: ReturnType<typeof calculateFacialState>;
-  palsy: PalsyType;
-  test: MimicTest;
-}) {
-  // SVG koordinat sistemi: 200 x 240
-  // Sol taraf SVG'de x < 100, Sağ taraf x > 100 (izleyicinin bakış açısına göre ayna simetrisi)
-  // Tıpta sol taraf ekranda sağdadır (x > 100 = Hastanın Solu; x < 100 = Hastanın Sağı).
-
-  const patientLeftWrinkle = state.leftForeheadWrinkle;
-  const patientRightWrinkle = state.rightForeheadWrinkle;
-  const patientLeftEyeClosed = state.leftEyeClosure;
-  const patientRightEyeClosed = state.rightEyeClosure;
-  const patientLeftBell = state.leftBellPhenomenon;
-  const patientRightBell = state.rightBellPhenomenon;
-
-  // Ağız kayması: state.mouthMidlineOffset (-1: hasta sağı / ekran solu, +1: hasta solu / ekran sağı)
-  const mouthShiftX = state.mouthMidlineOffset * 8;
-  const mouthLeftPullY = state.leftMouthPull * 7;
-  const mouthRightPullY = state.rightMouthPull * 7;
-
-  return (
-    <svg viewBox="0 0 200 240" className="h-full w-full select-none">
-      {/* Yüz Konturu */}
-      <ellipse
-        cx="100"
-        cy="120"
-        rx="70"
-        ry="90"
-        fill="#1a1c23"
-        stroke="#333846"
-        strokeWidth="2"
-      />
-
-      {/* Taraf Etiketleri */}
-      <text x="35" y="30" fill="#667085" fontSize="8" fontWeight="600">
-        SAĞ
-      </text>
-      <text x="145" y="30" fill="#667085" fontSize="8" fontWeight="600">
-        SOL
-      </text>
-
-      {/* ALIN ÇİZGİLERİ */}
-      {/* Hastanın Sağı (Ekran Solu: x: 45 - 90) */}
-      {patientRightWrinkle > 0.1 && (
-        <g stroke="#c8a050" strokeWidth="1.8" strokeLinecap="round" opacity={patientRightWrinkle}>
-          <path d="M 50 62 Q 70 58 90 62" />
-          <path d="M 52 70 Q 70 66 88 70" />
-        </g>
-      )}
-
-      {/* Hastanın Solu (Ekran Sağı: x: 110 - 155) */}
-      {patientLeftWrinkle > 0.1 && (
-        <g stroke="#c8a050" strokeWidth="1.8" strokeLinecap="round" opacity={patientLeftWrinkle}>
-          <path d="M 110 62 Q 130 58 150 62" />
-          <path d="M 112 70 Q 130 66 148 70" />
-        </g>
-      )}
-
-      {/* KAŞLAR */}
-      {/* Sağ Kaş */}
-      <path
-        d={`M 50 ${patientRightWrinkle > 0.5 ? 82 : 86} Q 70 ${patientRightWrinkle > 0.5 ? 74 : 80} 90 ${patientRightWrinkle > 0.5 ? 80 : 84}`}
-        fill="none"
-        stroke="#8b949e"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-      />
-      {/* Sol Kaş */}
-      <path
-        d={`M 110 ${patientLeftWrinkle > 0.5 ? 80 : 84} Q 130 ${patientLeftWrinkle > 0.5 ? 74 : 80} 150 ${patientLeftWrinkle > 0.5 ? 82 : 86}`}
-        fill="none"
-        stroke="#8b949e"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-      />
-
-      {/* GÖZLER */}
-      {/* Sağ Göz (Ekran Solu: cx: 70, cy: 105) */}
-      <g>
-        <ellipse cx="70" cy="105" rx="14" ry="8" fill="#0d1117" stroke="#484f58" strokeWidth="1.2" />
-        {patientRightBell ? (
-          // Bell Fenomeni: Gözbebeği yukarı-dışa kayar, sklera görünür
-          <>
-            <circle cx="67" cy="100" r="5" fill="#58a6ff" />
-            <ellipse cx="70" cy="105" rx="14" ry={patientRightEyeClosed * 8} fill="#21262d" opacity="0.6" />
-            <text x="45" y="122" fill="#f85149" fontSize="6.5" fontWeight="bold">
-              Bell Fenomeni
-            </text>
-          </>
-        ) : patientRightEyeClosed > 0.8 ? (
-          // Normal Kapanmış Göz
-          <path d="M 56 105 Q 70 108 84 105" fill="none" stroke="#e6edf3" strokeWidth="2" strokeLinecap="round" />
-        ) : (
-          // Açık Göz
-          <circle cx="70" cy="105" r="4.5" fill="#58a6ff" />
-        )}
-      </g>
-
-      {/* Sol Göz (Ekran Sağı: cx: 130, cy: 105) */}
-      <g>
-        <ellipse cx="130" cy="105" rx="14" ry="8" fill="#0d1117" stroke="#484f58" strokeWidth="1.2" />
-        {patientLeftBell ? (
-          // Bell Fenomeni
-          <>
-            <circle cx="133" cy="100" r="5" fill="#58a6ff" />
-            <ellipse cx="130" cy="105" rx="14" ry={patientLeftEyeClosed * 8} fill="#21262d" opacity="0.6" />
-            <text x="105" y="122" fill="#f85149" fontSize="6.5" fontWeight="bold">
-              Bell Fenomeni
-            </text>
-          </>
-        ) : patientLeftEyeClosed > 0.8 ? (
-          <path d="M 116 105 Q 130 108 144 105" fill="none" stroke="#e6edf3" strokeWidth="2" strokeLinecap="round" />
-        ) : (
-          <circle cx="130" cy="105" r="4.5" fill="#58a6ff" />
-        )}
-      </g>
-
-      {/* BURUN */}
-      <path d="M 100 95 L 98 135 L 105 137" fill="none" stroke="#484f58" strokeWidth="1.5" strokeLinecap="round" />
-
-      {/* NAZOLABİAL OLUKLAR */}
-      {/* Sağ Nazolabial (Sağ felçte silik) */}
-      <path
-        d="M 88 135 Q 80 150 75 165"
-        fill="none"
-        stroke="#484f58"
-        strokeWidth={palsy === "bell-right" ? "0.6" : "1.8"}
-        opacity={palsy === "bell-right" ? 0.3 : 0.8}
-      />
-      {/* Sol Nazolabial (Sol felçte silik) */}
-      <path
-        d="M 112 135 Q 120 150 125 165"
-        fill="none"
-        stroke="#484f58"
-        strokeWidth={palsy === "bell-left" ? "0.6" : "1.8"}
-        opacity={palsy === "bell-left" ? 0.3 : 0.8}
-      />
-
-      {/* AĞIZ */}
-      <g transform={`translate(${mouthShiftX}, 0)`}>
-        {/* Dudak Çizgisi */}
-        <path
-          d={`M ${75 - mouthRightPullY} ${175 - mouthRightPullY} Q 100 ${178} ${125 + mouthLeftPullY} ${175 - mouthLeftPullY}`}
-          fill="none"
-          stroke="#e6edf3"
-          strokeWidth="2.8"
-          strokeLinecap="round"
-        />
-        {/* Alt Dudak Kavsi */}
-        <path
-          d={`M ${80 - mouthRightPullY * 0.5} ${178 - mouthRightPullY * 0.5} Q 100 186 ${120 + mouthLeftPullY * 0.5} ${178 - mouthLeftPullY * 0.5}`}
-          fill="none"
-          stroke="#c48b7a"
-          strokeWidth="1.8"
-        />
-      </g>
-
-      {/* YANAK ŞİŞİRME HAVASI */}
-      {test === "puff-cheeks" && (
-        <>
-          {state.leftCheekTone === 0 && (
-            <text x="135" y="175" fill="#f85149" fontSize="7" fontWeight="bold">
-              💨 Kaçak!
-            </text>
-          )}
-          {state.rightCheekTone === 0 && (
-            <text x="35" y="175" fill="#f85149" fontSize="7" fontWeight="bold">
-              💨 Kaçak!
-            </text>
-          )}
-        </>
-      )}
-    </svg>
   );
 }

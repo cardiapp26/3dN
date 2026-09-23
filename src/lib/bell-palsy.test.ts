@@ -1,8 +1,10 @@
 import test, { describe } from "node:test";
 import assert from "node:assert/strict";
 import {
+  BELL_PALSY_SAFETY,
   calculateFacialState,
   HOUSE_BRACKMANN_GRADES,
+  isEyeVisuallyClosed,
   TOPODIAGNOSTIC_LEVELS,
   TREATMENT_PROTOCOL,
   type HouseBrackmannGrade,
@@ -62,8 +64,18 @@ describe("Bell Paralizisi Simülatör ve Nöromüsküler Hesaplama", () => {
     assert.ok(eye.leftEyeClosure > 0.8, "Santral lezyonda göz kapanması korunmalı");
 
     const smile = calculateFacialState("central-left", "smile");
-    assert.ok(smile.leftMouthPull < 0.2, "Alt yüz karşı korteksten tek taraflı lif aldığı için felç olmalı");
+    assert.ok(
+      smile.leftMouthPull < 0.2,
+      "Alt yüz karşı korteksten tek taraflı lif aldığı için felç olmalı",
+    );
     assert.equal(smile.mouthMidlineOffset, 1, "Ağız sağlam sağ tarafa kaymalı");
+  });
+
+  test("göz yalnız göz kapatma manevrasında kapalı çizilir", () => {
+    assert.equal(isEyeVisuallyClosed("wrinkle-forehead", 1), false);
+    assert.equal(isEyeVisuallyClosed("smile", 1), false);
+    assert.equal(isEyeVisuallyClosed("close-eyes", 1), true);
+    assert.equal(isEyeVisuallyClosed("close-eyes", 0.25), false);
   });
 });
 
@@ -76,8 +88,14 @@ describe("House-Brackmann Evreleme Sistemi Doğrulaması", () => {
       assert.equal(item.grade, g);
       assert.ok(item.title.length > 0);
       assert.ok(item.summary.length > 0);
-      assert.ok(item.recoveryRate.length > 0);
-      assert.ok(item.management.length > 0);
+      assert.ok(item.clinicalFocus.length > 0);
+    }
+  });
+
+  test("evreler kanıtsız sabit iyileşme yüzdesi veya otomatik tedavi reçetesi içermez", () => {
+    for (const item of Object.values(HOUSE_BRACKMANN_GRADES)) {
+      const visibleText = Object.values(item).join(" ");
+      assert.doesNotMatch(visibleText, /(?:%\s*\d|\d\s*%)|valasiklovir|dekompresyon/i);
     }
   });
 
@@ -103,9 +121,17 @@ describe("Topodiagnostik Lezyon Haritası Doğrulaması", () => {
 
     const stylo = TOPODIAGNOSTIC_LEVELS.find((l) => l.id === "foramen-stylomastoideum");
     assert.ok(stylo);
-    assert.equal(stylo.lacrimation.intact, true, "Foramen stylomastoideumda lakrimasyon sağlam kalmalı");
+    assert.equal(
+      stylo.lacrimation.intact,
+      true,
+      "Foramen stylomastoideumda lakrimasyon sağlam kalmalı",
+    );
     assert.equal(stylo.taste.intact, true, "Foramen stylomastoideumda tat sağlam kalmalı");
-    assert.equal(stylo.stapedius.intact, true, "Foramen stylomastoideumda stapedius sağlam kalmalı");
+    assert.equal(
+      stylo.stapedius.intact,
+      true,
+      "Foramen stylomastoideumda stapedius sağlam kalmalı",
+    );
     assert.equal(stylo.motor.intact, false, "Foramen stylomastoideumda mimik felci olmalı");
   });
 });
@@ -117,5 +143,16 @@ describe("Klinik Tedavi ve Göz Koruma Protokolü", () => {
     assert.ok(TREATMENT_PROTOCOL.eyeProtection.daytime.length > 0);
     assert.ok(TREATMENT_PROTOCOL.eyeProtection.nighttime.length > 0);
     assert.ok(TREATMENT_PROTOCOL.complications.length >= 3);
+  });
+
+  test("antiviral monoterapi önerilmez ve ilaç rejimleri hekim değerlendirmesine bağlanır", () => {
+    assert.match(TREATMENT_PROTOCOL.antivirals.notes, /tek başına.*önerilmez/i);
+    assert.match(TREATMENT_PROTOCOL.corticosteroids.cautions, /hekim/i);
+  });
+
+  test("acil ve atipik ayırıcı tanı güvenlik ağı mevcuttur", () => {
+    assert.ok(BELL_PALSY_SAFETY.emergencySigns.length >= 4);
+    assert.ok(BELL_PALSY_SAFETY.atypicalFeatures.length >= 4);
+    assert.match(BELL_PALSY_SAFETY.patternWarning, /dışlamaz/i);
   });
 });

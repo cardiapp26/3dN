@@ -24,12 +24,7 @@ interface AtlasLightboxProps {
   onSelectPlate: (plate: AtlasPlate) => void;
 }
 
-export function AtlasLightbox({
-  plate,
-  plates,
-  onClose,
-  onSelectPlate,
-}: AtlasLightboxProps) {
+export function AtlasLightbox({ plate, plates, onClose, onSelectPlate }: AtlasLightboxProps) {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -87,9 +82,9 @@ export function AtlasLightbox({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
-      } else if (e.key === "ArrowLeft") {
+      } else if (e.key === "ArrowLeft" && plates.length > 1) {
         handlePrev();
-      } else if (e.key === "ArrowRight") {
+      } else if (e.key === "ArrowRight" && plates.length > 1) {
         handleNext();
       } else if (e.key === "+" || e.key === "=") {
         zoomIn();
@@ -102,7 +97,7 @@ export function AtlasLightbox({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [plate, onClose, handlePrev, handleNext, resetTransform]);
+  }, [plate, plates.length, onClose, handlePrev, handleNext, resetTransform]);
 
   // Prevent background scroll while open
   useEffect(() => {
@@ -254,19 +249,25 @@ export function AtlasLightbox({
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
         {/* Stage: the plate and its paging arrows, laid out apart from the info panel */}
         <div className="relative flex min-w-0 flex-1">
-          <button
-            type="button"
-            onClick={handlePrev}
-            aria-label="Önceki levha"
-            className="absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/60 p-2.5 text-white/70 backdrop-blur transition-colors hover:bg-black/80 hover:text-white"
-          >
-            <ChevronLeft className="size-6" />
-          </button>
+          {plates.length > 1 && (
+            <button
+              type="button"
+              onClick={handlePrev}
+              aria-label="Önceki levha"
+              className="absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/60 p-2.5 text-white/70 backdrop-blur transition-colors hover:bg-black/80 hover:text-white"
+            >
+              <ChevronLeft className="size-6" />
+            </button>
+          )}
 
           <div
             className={cn(
               "flex min-w-0 flex-1 items-center justify-center overflow-hidden p-4 select-none",
-              zoom > 1 ? (isDragging ? "cursor-grabbing touch-none" : "cursor-grab touch-none") : "cursor-default",
+              zoom > 1
+                ? isDragging
+                  ? "cursor-grabbing touch-none"
+                  : "cursor-grab touch-none"
+                : "cursor-default",
             )}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
@@ -301,14 +302,16 @@ export function AtlasLightbox({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleNext}
-            aria-label="Sonraki levha"
-            className="absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/60 p-2.5 text-white/70 backdrop-blur transition-colors hover:bg-black/80 hover:text-white"
-          >
-            <ChevronRight className="size-6" />
-          </button>
+          {plates.length > 1 && (
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Sonraki levha"
+              className="absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/60 p-2.5 text-white/70 backdrop-blur transition-colors hover:bg-black/80 hover:text-white"
+            >
+              <ChevronRight className="size-6" />
+            </button>
+          )}
         </div>
 
         {/* Anatomical Information Sidebar */}
@@ -327,9 +330,7 @@ export function AtlasLightbox({
                 <h4 className="text-xs uppercase tracking-[0.16em] text-white/50 font-medium">
                   Anatomik Açıklama
                 </h4>
-                <p className="mt-1.5 text-sm text-white/80 leading-relaxed">
-                  {plate.description}
-                </p>
+                <p className="mt-1.5 text-sm text-white/80 leading-relaxed">{plate.description}</p>
               </div>
 
               <div>
@@ -376,7 +377,10 @@ export function AtlasLightbox({
 
               <div className="rounded-lg bg-white/5 p-3 text-xs text-white/50 border border-white/5">
                 <p className="font-medium text-white/70 mb-1">İpucu:</p>
-                <p>Görseli çift tıklayarak büyütebilir, büyüttükten sonra sürükleyerek kaydırabilirsiniz.</p>
+                <p>
+                  Görseli çift tıklayarak büyütebilir, büyüttükten sonra sürükleyerek
+                  kaydırabilirsiniz.
+                </p>
               </div>
             </div>
           </aside>
