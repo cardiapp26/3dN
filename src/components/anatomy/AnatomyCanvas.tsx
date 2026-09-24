@@ -646,11 +646,11 @@ function SignalDriver() {
 function Lights() {
   return (
     <>
-      <ambientLight intensity={0.12} />
-      <hemisphereLight args={["#dfe6f2", "#1a1512", 0.35]} />
-      <directionalLight position={[18, 26, 22]} intensity={2.1} color="#fff1e2" />
-      <directionalLight position={[-22, 8, -14]} intensity={1.1} color="#9fb8d6" />
-      <directionalLight position={[0, -20, 18]} intensity={0.3} color="#d9c7b8" />
+      <ambientLight intensity={0.3} />
+      <hemisphereLight args={["#e6ecf6", "#2c2620", 0.6]} />
+      <directionalLight position={[18, 26, 22]} intensity={2.4} color="#fff1e2" />
+      <directionalLight position={[-22, 8, -14]} intensity={1.35} color="#a8c0dc" />
+      <directionalLight position={[0, -20, 18]} intensity={0.55} color="#d9c7b8" />
       <Environment resolution={128} frames={1}>
         <Lightformer form="rect" intensity={2.4} color="#fff3e4" position={[0, 12, 10]} scale={[20, 8, 1]} target={[0, 0, 0]} />
         <Lightformer form="rect" intensity={1.2} color="#9cc0ff" position={[-18, 2, -8]} scale={[10, 18, 1]} target={[0, 0, 0]} />
@@ -680,12 +680,7 @@ export function AnatomyCanvas() {
   }, []);
 
   return (
-    <div
-      className="relative h-full w-full"
-      style={{
-        background: "radial-gradient(120% 90% at 50% 32%, #1b2331 0%, #0e1218 55%, #07090c 100%)",
-      }}
-    >
+    <div className="relative h-full w-full bg-bg">
       <Canvas
         className="h-full w-full touch-none"
         dpr={[1, 2]}

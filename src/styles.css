@@ -1,34 +1,35 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,500;1,8..60,600&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap");
 @import "tailwindcss";
 
 /*
- * "Anatomy atlas after hours": ink-dark plates, warm ivory type, Latin in a
- * classical italic serif, and one accent, the yellow atlases use for nerves.
+ * "Anatomy atlas after hours": slate plates, warm ivory type, Latin in a sturdy
+ * serif italic that stays readable at caption size, and one accent, the yellow
+ * atlases use for nerves.
  */
 @theme {
-  --color-bg: #0a0d12;
-  --color-surface: #11151c;
-  --color-surface-2: #182029;
-  --color-fg: #ece5d6;
-  --color-muted: #9b978d;
-  --color-subtle: #6f6c66;
-  --color-accent: #ece5d6;
-  --color-accent-foreground: #0a0d12;
-  --color-gold: #d8b45f;
-  --color-border: color-mix(in oklab, #ece5d6 11%, transparent);
-  --color-ring: #d8b45f;
+  --color-bg: #212836;
+  --color-surface: #2b3342;
+  --color-surface-2: #3a4353;
+  --color-fg: #f7f2e8;
+  --color-muted: #d0cabc;
+  --color-subtle: #ada79b;
+  --color-accent: #f7f2e8;
+  --color-accent-foreground: #212836;
+  --color-gold: #e8c672;
+  --color-border: color-mix(in oklab, #f7f2e8 19%, transparent);
+  --color-ring: #e8c672;
   --color-sensory: #86a8c8;
   --color-motor: #d38f80;
   --color-mixed: #8fc2a0;
   --font-sans: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
-  --font-display: "Cormorant Garamond", "Garamond", "Times New Roman", serif;
+  --font-display: "Source Serif 4", "Iowan Old Style", Georgia, serif;
   --radius-xs: 4px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
-  --shadow-border: 0 0 0 1px rgba(236, 229, 214, 0.08);
-  --shadow-border-hover: 0 0 0 1px rgba(236, 229, 214, 0.14);
+  --shadow-border: 0 0 0 1px rgba(247, 242, 232, 0.14);
+  --shadow-border-hover: 0 0 0 1px rgba(247, 242, 232, 0.22);
 }
 
 :root {
@@ -101,12 +102,12 @@
   pointer-events: none;
   white-space: nowrap;
   font-family: var(--font-sans);
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-fg);
-  background: color-mix(in oklab, #0a0d12 70%, transparent);
+  background: color-mix(in oklab, #161c26 76%, transparent);
   backdrop-filter: blur(6px);
   border: 1px solid color-mix(in oklab, var(--color-gold) 28%, transparent);
   border-radius: 999px;
@@ -116,7 +117,7 @@
 
 .nerve-chip span {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
   letter-spacing: 0;
 }
@@ -133,17 +134,17 @@
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 600;
-  letter-spacing: 0.005em;
+  letter-spacing: 0;
 }
 
 /* Small tracked caption over headings and section titles. */
 .eyebrow {
   font-family: var(--font-sans);
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-subtle);
+  color: var(--color-muted);
 }
 
 /* Hairline in nerve gold that fades out, like a rule on an atlas plate. */
@@ -158,11 +159,6 @@
 .paper {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.93  0 0 0 0 0.9  0 0 0 0 0.84  0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
   background-size: 160px 160px;
-}
-
-.studio-vignette {
-  pointer-events: none;
-  background: radial-gradient(ellipse at 50% 42%, transparent 62%, color-mix(in oklab, #0b0d10 55%, transparent) 100%);
 }
 
 .panel-enter {

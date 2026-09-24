@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Clock,
   Eye,
-  Info,
   ShieldAlert,
   Smile,
   Sparkles,
@@ -16,372 +15,99 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   BELL_PALSY_SAFETY,
-  calculateFacialState,
   EVIDENCE_SOURCES,
   HOUSE_BRACKMANN_GRADES,
   HOUSE_BRACKMANN_NOTE,
   TOPODIAGNOSTIC_LEVELS,
   TREATMENT_PROTOCOL,
   type HouseBrackmannGrade,
-  type MimicTest,
-  type PalsyType,
 } from "@/lib/bell-palsy";
 import { useStudio } from "@/lib/studio-store";
 import { cn } from "@/lib/utils";
-import { FacialNerveAtlas } from "./FacialNerveAtlas";
+import { PatternTab } from "./bell/PatternTab";
 
-type BellTab = "simulator" | "grading" | "topodiagnostics" | "protocol";
+type BellTab = "pattern" | "grading" | "topodiagnostics" | "protocol";
 
+const TABS: { id: BellTab; label: string; long: string; icon: typeof Smile }[] = [
+  { id: "pattern", label: "Patern", long: "Fasiyal patern ve tanı", icon: Smile },
+  { id: "grading", label: "Evreleme", long: "House-Brackmann evreleri", icon: Activity },
+  {
+    id: "topodiagnostics",
+    label: "Lokalizasyon",
+    long: "Topodiagnostik lokalizasyon",
+    icon: Stethoscope,
+  },
+  { id: "protocol", label: "Tedavi", long: "Akut tedavi ve göz koruma", icon: ShieldAlert },
+];
+
+/** Clinical module for CN VII: one question per tab, the rest folded away. */
 export function BellPalsyView() {
-  const [activeTab, setActiveTab] = useState<BellTab>("simulator");
-  const [palsyType, setPalsyType] = useState<PalsyType>("bell-left");
-  const [mimicTest, setMimicTest] = useState<MimicTest>("wrinkle-forehead");
+  const [activeTab, setActiveTab] = useState<BellTab>("pattern");
   const [selectedGrade, setSelectedGrade] = useState<HouseBrackmannGrade>(4);
   const [selectedLevelId, setSelectedLevelId] = useState<string>("ganglion-geniculi");
 
   const setSelected = useStudio((s) => s.setSelected);
   const setMode = useStudio((s) => s.setMode);
 
-  const facialState = calculateFacialState(palsyType, mimicTest);
   const gradeInfo = HOUSE_BRACKMANN_GRADES[selectedGrade];
   const levelInfo =
     TOPODIAGNOSTIC_LEVELS.find((l) => l.id === selectedLevelId) ?? TOPODIAGNOSTIC_LEVELS[1];
 
-  function openFacialIn3D() {
-    setSelected(7); // CN VII (N. facialis)
-    setMode("innervation");
-  }
-
   return (
-    <div className="flex h-full flex-col overflow-y-auto bg-bg p-4 md:p-6">
-      {/* Başlık ve Üst Çubuk */}
-      <div className="mb-6 flex flex-col justify-between gap-4 border-b border-border pb-4 md:flex-row md:items-center">
-        <div>
+    <div className="scroll-thin flex h-full flex-col overflow-y-auto bg-bg">
+      <header className="flex shrink-0 flex-wrap items-end justify-between gap-3 border-b border-border px-4 pb-4 pt-5 md:px-6">
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="eyebrow tracking-widest text-gold">Klinik Nöroloji Modülü</span>
-            <Badge tone="mixed">CN VII · N. Facialis</Badge>
+            <p className="eyebrow text-gold">Klinik modül</p>
+            <Badge tone="mixed">CN VII</Badge>
           </div>
-          <h1 className="latin mt-1 text-2xl font-semibold text-fg md:text-3xl">
-            Bell Paralizisi{" "}
-            <span className="text-muted text-lg font-normal">/ Paralysis Facialis</span>
-          </h1>
-          <p className="mt-1 text-xs text-muted md:text-sm">
-            Akut fasiyal güçsüzlük paterni, güvenlik ağı, House-Brackmann evrelemesi ve kanıta
-            dayalı ilk yaklaşım.
+          <h1 className="latin mt-1 text-3xl leading-none text-fg">Paralysis facialis</h1>
+          <p className="mt-1 text-sm text-muted">
+            Bell paralizisi: patern, evreleme, lokalizasyon ve ilk 72 saat.
           </p>
         </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            setSelected(7);
+            setMode("innervation");
+          }}
+          className="gap-2 border-gold/40 text-gold hover:bg-gold/10"
+        >
+          <Sparkles className="size-3.5" />
+          <span>3D n. facialis</span>
+        </Button>
+      </header>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={openFacialIn3D}
-            className="gap-2 border-gold/40 text-gold hover:bg-gold/10"
-          >
-            <Sparkles className="size-3.5" />
-            <span>3D N. Facialis Yoluna Git</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* Alt Sekmeler */}
       <nav
-        aria-label="Bell paralizisi modül bölümleri"
-        className="mb-6 flex flex-wrap gap-1 rounded-xl bg-surface p-1 shadow-[var(--shadow-border)]"
+        aria-label="Bell paralizisi bölümleri"
+        className="scroll-thin flex shrink-0 gap-1 overflow-x-auto border-b border-border px-4 py-2 md:px-6"
       >
-        <button
-          type="button"
-          aria-pressed={activeTab === "simulator"}
-          onClick={() => setActiveTab("simulator")}
-          className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all md:text-sm",
-            activeTab === "simulator"
-              ? "bg-surface-2 text-fg shadow-sm"
-              : "text-muted hover:text-fg",
-          )}
-        >
-          <Smile className="size-4 text-gold" />
-          <span>Fasiyal Patern & Tanı</span>
-        </button>
-
-        <button
-          type="button"
-          aria-pressed={activeTab === "grading"}
-          onClick={() => setActiveTab("grading")}
-          className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all md:text-sm",
-            activeTab === "grading" ? "bg-surface-2 text-fg shadow-sm" : "text-muted hover:text-fg",
-          )}
-        >
-          <Activity className="size-4 text-gold" />
-          <span>House-Brackmann Evreleri</span>
-        </button>
-
-        <button
-          type="button"
-          aria-pressed={activeTab === "topodiagnostics"}
-          onClick={() => setActiveTab("topodiagnostics")}
-          className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all md:text-sm",
-            activeTab === "topodiagnostics"
-              ? "bg-surface-2 text-fg shadow-sm"
-              : "text-muted hover:text-fg",
-          )}
-        >
-          <Stethoscope className="size-4 text-gold" />
-          <span>Topodiagnostik Lokalizasyon</span>
-        </button>
-
-        <button
-          type="button"
-          aria-pressed={activeTab === "protocol"}
-          onClick={() => setActiveTab("protocol")}
-          className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all md:text-sm",
-            activeTab === "protocol"
-              ? "bg-surface-2 text-fg shadow-sm"
-              : "text-muted hover:text-fg",
-          )}
-        >
-          <ShieldAlert className="size-4 text-gold" />
-          <span>Akut Tedavi & Göz Koruma</span>
-        </button>
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const active = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              title={tab.long}
+              aria-pressed={active}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "flex shrink-0 items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors duration-[var(--motion-quick)]",
+                active ? "bg-surface-2 text-fg" : "text-muted hover:bg-surface hover:text-fg",
+              )}
+            >
+              <Icon className={cn("size-4", active && "text-gold")} />
+              {tab.label}
+            </button>
+          );
+        })}
       </nav>
 
-      {/* SEKME 1: YÜZ SİMÜLATÖRÜ & SANTRAL VS PERİFERİK */}
-      {activeTab === "simulator" && (
-        <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_1fr]">
-          {/* Sol Kolon: Simülatör Tuvali */}
-          <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <div>
-                <p className="eyebrow">İnteraktif CN VII Atlası</p>
-                <h3 className="latin text-lg text-fg">{facialState.summaryHeading}</h3>
-              </div>
-              <Badge
-                tone={
-                  palsyType.startsWith("bell")
-                    ? "motor"
-                    : palsyType.startsWith("central")
-                      ? "mixed"
-                      : "sensory"
-                }
-              >
-                {palsyType === "normal"
-                  ? "Fizyolojik"
-                  : palsyType.startsWith("bell")
-                    ? "Periferik LMN"
-                    : "Santral UMN"}
-              </Badge>
-            </div>
-
-            {/* Kranial sinir atlasından CN VII görünümü */}
-            <div className="mx-auto w-full max-w-[520px]">
-              <FacialNerveAtlas state={facialState} palsy={palsyType} test={mimicTest} />
-            </div>
-
-            {/* Lezyon Tipi Seçimi */}
-            <div>
-              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">
-                1. Klinik Durum Seçimi:
-              </p>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                <Button
-                  size="sm"
-                  variant={palsyType === "normal" ? "default" : "outline"}
-                  onClick={() => setPalsyType("normal")}
-                  className="text-xs"
-                >
-                  Normal
-                </Button>
-                <Button
-                  size="sm"
-                  variant={palsyType === "bell-left" ? "default" : "outline"}
-                  onClick={() => setPalsyType("bell-left")}
-                  className={cn(
-                    "text-xs",
-                    palsyType === "bell-left" && "bg-amber-600 hover:bg-amber-700",
-                  )}
-                >
-                  Sol Bell (Periferik)
-                </Button>
-                <Button
-                  size="sm"
-                  variant={palsyType === "bell-right" ? "default" : "outline"}
-                  onClick={() => setPalsyType("bell-right")}
-                  className={cn(
-                    "text-xs",
-                    palsyType === "bell-right" && "bg-amber-600 hover:bg-amber-700",
-                  )}
-                >
-                  Sağ Bell (Periferik)
-                </Button>
-                <Button
-                  size="sm"
-                  variant={palsyType === "central-left" ? "default" : "outline"}
-                  onClick={() => setPalsyType("central-left")}
-                  className={cn(
-                    "text-xs",
-                    palsyType === "central-left" && "bg-rose-700 hover:bg-rose-800",
-                  )}
-                >
-                  Sol Santral Patern
-                </Button>
-                <Button
-                  size="sm"
-                  variant={palsyType === "central-right" ? "default" : "outline"}
-                  onClick={() => setPalsyType("central-right")}
-                  className={cn(
-                    "text-xs",
-                    palsyType === "central-right" && "bg-rose-700 hover:bg-rose-800",
-                  )}
-                >
-                  Sağ Santral Patern
-                </Button>
-              </div>
-            </div>
-
-            {/* Mimik Testi Seçimi */}
-            <div>
-              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">
-                2. Test Edilen Mimik Fonksiyonu:
-              </p>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <Button
-                  size="sm"
-                  variant={mimicTest === "wrinkle-forehead" ? "secondary" : "ghost"}
-                  onClick={() => setMimicTest("wrinkle-forehead")}
-                  className={cn(
-                    "h-auto min-h-8 justify-start gap-2 whitespace-normal border border-border text-xs",
-                    mimicTest === "wrinkle-forehead" && "border-gold text-gold",
-                  )}
-                >
-                  <span className="font-semibold">Alın Kırıştırma</span>
-                  <span className="text-[10px] text-muted">(M. frontalis)</span>
-                </Button>
-                <Button
-                  size="sm"
-                  variant={mimicTest === "close-eyes" ? "secondary" : "ghost"}
-                  onClick={() => setMimicTest("close-eyes")}
-                  className={cn(
-                    "h-auto min-h-8 justify-start gap-2 whitespace-normal border border-border text-xs",
-                    mimicTest === "close-eyes" && "border-gold text-gold",
-                  )}
-                >
-                  <span className="font-semibold">Göz Kapatma</span>
-                  <span className="text-[10px] text-muted">(M. orbicularis oculi)</span>
-                </Button>
-                <Button
-                  size="sm"
-                  variant={mimicTest === "smile" ? "secondary" : "ghost"}
-                  onClick={() => setMimicTest("smile")}
-                  className={cn(
-                    "h-auto min-h-8 justify-start gap-2 whitespace-normal border border-border text-xs",
-                    mimicTest === "smile" && "border-gold text-gold",
-                  )}
-                >
-                  <span className="font-semibold">Gülümseme</span>
-                  <span className="text-[10px] text-muted">(M. zygomaticus)</span>
-                </Button>
-                <Button
-                  size="sm"
-                  variant={mimicTest === "puff-cheeks" ? "secondary" : "ghost"}
-                  onClick={() => setMimicTest("puff-cheeks")}
-                  className={cn(
-                    "h-auto min-h-8 justify-start gap-2 whitespace-normal border border-border text-xs",
-                    mimicTest === "puff-cheeks" && "border-gold text-gold",
-                  )}
-                >
-                  <span className="font-semibold">Yanak Şişirme</span>
-                  <span className="text-[10px] text-muted">(M. buccinator)</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Sağ Kolon: Klinik ve Anatomik Açıklama */}
-          <div className="flex flex-col gap-4">
-            <div className="rounded-xl border border-rose-500/40 bg-rose-500/5 p-5">
-              <div className="flex items-center gap-2 text-rose-400">
-                <ShieldAlert className="size-4" />
-                <h4 className="text-balance font-display text-base font-semibold">
-                  Önce Acili Dışla
-                </h4>
-              </div>
-              <p className="mt-2 text-pretty text-xs leading-relaxed text-fg/90">
-                Ani yüz güçsüzlüğü inme belirtisi olabilir. Kol-bacak güçsüzlüğü, konuşma bozukluğu,
-                çift görme, belirgin dengesizlik veya yeni şiddetli baş ağrısı varsa acil
-                değerlendirme gerekir.
-              </p>
-            </div>
-
-            {/* Canlı Test Bulgusu */}
-            <div className="rounded-xl border border-border bg-surface p-5">
-              <div className="flex items-center gap-2 text-gold">
-                <Info className="size-4" />
-                <h4 className="text-sm font-semibold uppercase tracking-wider">Muayene Bulgusu</h4>
-              </div>
-              <p className="mt-2 text-base font-medium text-fg">{facialState.clinicalNote}</p>
-              <p className="mt-2 text-xs leading-relaxed text-muted">
-                <span className="font-semibold text-fg">Nöroanatomik Mekanizma: </span>
-                {facialState.anatomicalBasis}
-              </p>
-            </div>
-
-            {/* Santral ve periferik patern ayrımı */}
-            <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5">
-              <div className="flex items-center gap-2 text-amber-400">
-                <AlertTriangle className="size-4.5" />
-                <h4 className="font-display text-base font-semibold">
-                  Lokalizasyon İpucu, Tanı Kuralı Değil
-                </h4>
-              </div>
-              <div className="mt-3 space-y-3 text-xs leading-relaxed text-muted">
-                <div className="rounded-lg bg-surface/80 p-3">
-                  <p className="font-semibold text-fg">Periferik Felç (Bell Paralizisi / LMN):</p>
-                  <p className="mt-0.5">
-                    N. facialis ana gövdesi veya nükleusu hasar gördüğü için{" "}
-                    <span className="font-semibold text-amber-300">
-                      alın dahil tüm hemifasiyal kaslar
-                    </span>{" "}
-                    felçtir. Hasta kaşını kaldıramaz, alnını kırıştıramaz ve gözünü kapatamaz (Bell
-                    fenomeni).
-                  </p>
-                </div>
-                <div className="rounded-lg bg-surface/80 p-3">
-                  <p className="font-semibold text-fg">Santral Felç (İnme / UMN):</p>
-                  <p className="mt-0.5">
-                    Fasiyal motor çekirdeğin üst yüz (alın) temsil alanı{" "}
-                    <span className="font-semibold text-emerald-400">
-                      her iki serebral hemisferden (bilateral kortikobulbar yol)
-                    </span>{" "}
-                    lif alır. Bu nedenle tek taraflı kortikal lezyonda karşı taraf alın kırıştırma
-                    ve göz kapama korunur; felç yalnızca alt yüze sınırlıdır.
-                  </p>
-                </div>
-                <p className="text-pretty font-medium text-amber-200">
-                  {BELL_PALSY_SAFETY.patternWarning}
-                </p>
-              </div>
-            </div>
-
-            {/* Bell Fenomeni Kutusu */}
-            <div className="rounded-xl border border-border bg-surface p-5">
-              <div className="flex items-center gap-2 text-fg">
-                <Eye className="size-4 text-gold" />
-                <h4 className="font-display text-base font-semibold">Bell Fenomeni Nedir?</h4>
-              </div>
-              <p className="mt-2 text-xs leading-relaxed text-muted">
-                Kişi gözlerini kapatmaya çalıştığında göz küresinin istemsiz olarak yukarı ve dışa
-                doğru dönmesi fizyolojik bir savunma refleksidir. Normal kişilerde göz kapağı
-                kapandığı için bu hareket görülmez. Bell paralizisinde <i>m. orbicularis oculi</i>{" "}
-                felcine bağlı göz açık kaldığından (lagoftalmi), skleranın beyaz kısmı dramatik
-                şekilde görünür hale gelir.
-              </p>
-            </div>
-          </div>
-        </section>
-      )}
+      <div className="p-4 md:p-6">
+        {activeTab === "pattern" && <PatternTab />}
 
       {/* SEKME 2: HOUSE-BRACKMANN EVRELEME SKORU */}
       {activeTab === "grading" && (
@@ -798,6 +524,7 @@ export function BellPalsyView() {
           </div>
         </section>
       )}
+      </div>
     </div>
   );
 }
