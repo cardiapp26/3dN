@@ -45,6 +45,12 @@ import {
 } from "@/lib/anatomy/soft-models";
 import type { MeshReply, MeshRequest } from "@/lib/anatomy/models.worker";
 import { useStudio } from "@/lib/studio-store";
+import { cn } from "@/lib/utils";
+import {
+  calculateOrganActivation,
+  getOrganInnervation,
+  VAGUS_COURSE_WAYPOINTS,
+} from "@/lib/organ-innervation";
 import {
   EXPLODE_CM,
   Ganglia,
@@ -53,7 +59,7 @@ import {
   VIEW_VARYINGS,
   vivid,
 } from "./NerveSystem";
-import { installRadialTwitch } from "./muscle-twitch";
+import { ALL_MUSCLE_APEXES, installRadialTwitch } from "./muscle-twitch";
 
 /* ------------------------------------------------------------------ */
 /* Organ meshes: built once per page in workers, cached across mounts  */
@@ -259,10 +265,48 @@ function useOrganMaterials(): OrganMaterials {
 /** Nerves whose central ends lie on the cerebrum rather than the brainstem. */
 const FOREBRAIN_NERVES = new Set([1, 2]);
 
+export const ANATOMY_INFO: Record<string, { nameLa: string; nameTr?: string; category: string }> = {
+  brainstem: { nameLa: "Truncus encephali", nameTr: "Beyin sapı", category: "Beyin sapı" },
+  skull: { nameLa: "Cranium", nameTr: "Kafatası", category: "Kemik" },
+  mandible: { nameLa: "Mandibula", nameTr: "Alt çene kemiği", category: "Kemik" },
+  spine: { nameLa: "Vertebrae cervicales", nameTr: "Servikal omurlar", category: "Kemik" },
+  cerebellum: { nameLa: "Cerebellum", nameTr: "Beyincik", category: "Beyin" },
+  cerebrum: { nameLa: "Cerebrum", nameTr: "Beyin korteksi", category: "Beyin" },
+  eye: { nameLa: "Bulbus oculi", nameTr: "Göz küresi", category: "Göz" },
+  masseter: { nameLa: "M. masseter", nameTr: "Çiğneme kası", category: "Kas" },
+  temporalis: { nameLa: "M. temporalis", nameTr: "Şakak kası", category: "Kas" },
+  frontalis: { nameLa: "M. frontalis", nameTr: "Alın kası", category: "Kas" },
+  "orbicularis-oculi": { nameLa: "M. orbicularis oculi", nameTr: "Göz çevresi kası", category: "Kas" },
+  "orbicularis-oris": { nameLa: "M. orbicularis oris", nameTr: "Ağız çevresi kası", category: "Kas" },
+  zygomaticus: { nameLa: "M. zygomaticus major", nameTr: "Büyük elmacık kası", category: "Kas" },
+  buccinator: { nameLa: "M. buccinator", nameTr: "Yanak kası", category: "Kas" },
+  scm: { nameLa: "M. sternocleidomastoideus", nameTr: "SCM boyun kası", category: "Kas" },
+  trapezius: { nameLa: "M. trapezius", nameTr: "Trapez kası", category: "Kas" },
+  tongue: { nameLa: "Lingua", nameTr: "Dil kasları", category: "Kas" },
+  "eom-oculomotor": { nameLa: "Mm. recti & obliquus inf.", nameTr: "Okülomotor göz kasları", category: "Kas" },
+  "eom-trochlear": { nameLa: "M. obliquus superior", nameTr: "Üst oblik göz kası", category: "Kas" },
+  "eom-abducens": { nameLa: "M. rectus lateralis", nameTr: "Dış rektus göz kası", category: "Kas" },
+  pharynx: { nameLa: "Pharynx", nameTr: "Yutak", category: "Organ" },
+  airway: { nameLa: "Larynx & Trachea", nameTr: "Gırtlak ve soluk borusu", category: "Organ" },
+  oesophagus: { nameLa: "Oesophagus", nameTr: "Yemek borusu", category: "Organ" },
+  heart: { nameLa: "Cor", nameTr: "Kalp", category: "Organ" },
+  lungs: { nameLa: "Pulmones", nameTr: "Akciğerler", category: "Organ" },
+  stomach: { nameLa: "Gaster", nameTr: "Mide", category: "Organ" },
+  parotid: { nameLa: "Glandula parotidea", nameTr: "Parotis tükürük bezi", category: "Bez" },
+  submandibular: { nameLa: "Glandula submandibularis", nameTr: "Çene altı tükürük bezi", category: "Bez" },
+  lacrimal: { nameLa: "Glandula lacrimalis", nameTr: "Gözyaşı bezi", category: "Bez" },
+  "olfactory-mucosa": { nameLa: "Regio olfactoria", nameTr: "Koku mukozası", category: "Duyu" },
+  labyrinth: { nameLa: "Auris interna", nameTr: "İç kulak labirenti", category: "Duyu" },
+  arteries: { nameLa: "Arteriae", nameTr: "Aorta ve karotis arterler", category: "Damar" },
+  veins: { nameLa: "Venae", nameTr: "V. cava ve juguler venler", category: "Damar" },
+  "thorax-bones": { nameLa: "Skeleton thoracis", nameTr: "Göğüs kafesi kemikleri", category: "Kemik" },
+};
+
 function Organs() {
   const { geometries } = useOrganProgress();
   const layers = useStudio((s) => s.layers);
   const selected = useStudio((s) => s.selectedId);
+  const setHoveredStructure = useStudio((s) => s.setHoveredStructure);
   const mats = useOrganMaterials();
 
   useEffect(() => {
@@ -274,13 +318,56 @@ function Organs() {
       {ANATOMY_MODELS.map((model) => {
         const geometry = geometries.get(model.id);
         if (!geometry || isSoftModel(model)) return null;
+        const info = ANATOMY_INFO[model.id] ?? { nameLa: model.id, category: "Organ" };
+
         if (model.material === "bone") {
           // Transparent queue after nerves and effects (lungs come later):
           // depth first, then colour.
+          const isSkull = model.id === "skull";
           return (
             <group key={model.id} visible={layers[model.layer]}>
               <mesh geometry={geometry} material={mats.boneDepth} renderOrder={40} />
-              <mesh geometry={geometry} material={mats.bone} renderOrder={41} onClick={(e) => e.stopPropagation()} />
+              <mesh
+                geometry={geometry}
+                material={mats.bone}
+                renderOrder={41}
+                userData={{ interactive: !isSkull, id: model.id }}
+                onClick={(e) => e.stopPropagation()}
+                onPointerOver={(e) => {
+                  if (e.nativeEvent.buttons > 0) return;
+                  if (isSkull) {
+                    const hasInner = e.intersections.some(
+                      (h) => h.object !== e.object && h.object.userData?.interactive,
+                    );
+                    if (hasInner) return;
+                  } else {
+                    e.stopPropagation();
+                  }
+                  setHoveredStructure({
+                    id: model.id,
+                    nameLa: info.nameLa,
+                    nameTr: info.nameTr,
+                    category: info.category,
+                    point: [e.point.x, e.point.y, e.point.z],
+                  });
+                }}
+                onPointerMove={
+                  isSkull
+                    ? (e) => {
+                        if (e.nativeEvent.buttons > 0) return;
+                        const hasInner = e.intersections.some(
+                          (h) => h.object !== e.object && h.object.userData?.interactive,
+                        );
+                        if (hasInner) {
+                          setHoveredStructure((curr) => (curr?.id === "skull" ? null : curr));
+                        }
+                      }
+                    : undefined
+                }
+                onPointerOut={() => {
+                  setHoveredStructure((curr) => (curr?.id === model.id ? null : curr));
+                }}
+              />
             </group>
           );
         }
@@ -295,7 +382,34 @@ function Organs() {
           return (
             <group key={model.id} visible={visible}>
               <mesh geometry={geometry} material={mats.boneDepth} renderOrder={38} />
-              <mesh geometry={geometry} material={mats.brainGhost} renderOrder={39} onClick={(e) => e.stopPropagation()} />
+              <mesh
+                geometry={geometry}
+                material={mats.brainGhost}
+                renderOrder={39}
+                userData={{ interactive: true, id: model.id }}
+                onClick={(e) => e.stopPropagation()}
+                onPointerOver={(e) => {
+                  if (e.nativeEvent.buttons > 0) return;
+                  const hasInner = e.intersections.some(
+                    (h) =>
+                      h.object !== e.object &&
+                      h.object.userData?.interactive &&
+                      h.object.userData?.id !== model.id,
+                  );
+                  if (hasInner) return;
+                  e.stopPropagation();
+                  setHoveredStructure({
+                    id: model.id,
+                    nameLa: info.nameLa,
+                    nameTr: info.nameTr,
+                    category: info.category,
+                    point: [e.point.x, e.point.y, e.point.z],
+                  });
+                }}
+                onPointerOut={() => {
+                  setHoveredStructure((curr) => (curr?.id === model.id ? null : curr));
+                }}
+              />
             </group>
           );
         }
@@ -305,7 +419,22 @@ function Organs() {
             geometry={geometry}
             material={mats[model.material]}
             visible={visible}
+            userData={{ interactive: true, id: model.id }}
             onClick={(e) => e.stopPropagation()}
+            onPointerOver={(e) => {
+              if (e.nativeEvent.buttons > 0) return;
+              e.stopPropagation();
+              setHoveredStructure({
+                id: model.id,
+                nameLa: info.nameLa,
+                nameTr: info.nameTr,
+                category: info.category,
+                point: [e.point.x, e.point.y, e.point.z],
+              });
+            }}
+            onPointerOut={() => {
+              setHoveredStructure((curr) => (curr?.id === model.id ? null : curr));
+            }}
           />
         );
       })}
@@ -374,6 +503,7 @@ function SoftOrgans({
   const layers = useStudio((s) => s.layers);
   const selected = useStudio((s) => s.selectedId);
   const setSelected = useStudio((s) => s.setSelected);
+  const setHoveredStructure = useStudio((s) => s.setHoveredStructure);
   const explode = useStudio((s) => s.explode);
   const mode = useStudio((s) => s.mode);
   const showLabels = useStudio((s) => s.showLabels);
@@ -382,10 +512,17 @@ function SoftOrgans({
     e.stopPropagation();
     if (isDragOrbit(e)) return;
     if (model.nerveIds.length > 0) {
+      const organ = getOrganInnervation(model.id);
       if (selected !== null && model.nerveIds.includes(selected)) {
+        if (organ) {
+          useStudio.getState().setFocusTarget(organ.cameraFocus);
+        }
         return;
       }
       setSelected(model.nerveIds[0]);
+      if (organ) {
+        useStudio.getState().setFocusTarget(organ.cameraFocus);
+      }
     }
   };
   const mats = useMemo(() => {
@@ -399,13 +536,15 @@ function SoftOrgans({
   }, []);
   const twitchById = useMemo(() => {
     const map = new Map<string, { value: number }>();
-    for (const [id, apex] of Object.entries(EOM_APEX)) {
+    for (const [id, apex] of Object.entries(ALL_MUSCLE_APEXES)) {
       const material = mats.get(id);
       if (material) map.set(id, installRadialTwitch(material, id, apex));
     }
     return map;
   }, [mats]);
   const lungDepth = useMemo(() => new MeshBasicMaterial({ colorWrite: false, transparent: true }), []);
+  const meshRefs = useRef<Map<string, Mesh>>(new Map());
+
   useEffect(
     () => () => {
       mats.forEach((m) => m.dispose());
@@ -414,16 +553,56 @@ function SoftOrgans({
     [mats, lungDepth],
   );
 
-  useEffect(() => {
-    const tint = selected !== null ? vivid(nerveById(selected).color) : "#000000";
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime();
+    const state = useStudio.getState();
+    const { selectedId, signalProgress, playing, hoveredStructure } = state;
+    const hoveredOrganId = hoveredStructure ? hoveredStructure.id.replace(/-?-1$/, "") : null;
+
     for (const model of SOFT_MODELS) {
+      if (model.material === "bone") continue;
       const m = mats.get(model.id);
       if (!m) continue;
-      const { related } = softState(model, layers, selected);
-      m.emissive.set(related ? tint : "#000000");
-      m.emissiveIntensity = related ? 0.35 : 0;
+
+      const act = calculateOrganActivation(model.id, selectedId, signalProgress, playing);
+      const isHovered = hoveredOrganId === model.id;
+      const { related } = softState(model, layers, selectedId);
+
+      if (related && selectedId !== null) {
+        const tint = vivid(nerveById(selectedId).color);
+        m.emissive.set(tint);
+        m.emissiveIntensity = 0.25 + 0.75 * act;
+      } else if (isHovered) {
+        m.emissive.set("#ffdf80");
+        m.emissiveIntensity = 0.65;
+      } else {
+        m.emissive.set("#000000");
+        m.emissiveIntensity = 0;
+      }
+
+      // Dynamic organ mechanical contraction & pulse
+      const halves = model.mirror ? ([1, -1] as const) : ([1] as const);
+      for (const dir of halves) {
+        const mesh = meshRefs.current.get(`${model.id}-${dir}`);
+        if (!mesh) continue;
+
+        if (model.id === "heart") {
+          // Vagal bradycardic pulse & systolic heartbeat
+          const beat = Math.sin(time * 5.5);
+          const systolic = Math.max(0, beat) * (0.04 + 0.08 * act);
+          mesh.scale.set(dir * (1 - systolic), 1 - systolic * 0.9, 1 - systolic * 1.1);
+        } else if (model.id === "stomach") {
+          // Gastric peristalsis wave
+          const peristalsis = Math.sin(time * 3.5) * (0.02 + 0.05 * act);
+          mesh.scale.set(dir * (1 + peristalsis), 1 - peristalsis * 0.7, 1 + peristalsis);
+        } else if (model.id === "lungs") {
+          // Respiratory tidal rhythm
+          const breath = Math.sin(time * 2.2) * (0.02 + 0.04 * act);
+          mesh.scale.set(dir * (1 + breath), 1 + breath * 0.8, 1 + breath);
+        }
+      }
     }
-  }, [selected, layers, mats]);
+  });
 
   return (
     <group>
@@ -433,6 +612,10 @@ function SoftOrgans({
         const { related, visible } = softState(model, layers, selected);
         if (!visible) return null;
         const halves = model.mirror ? ([1, -1] as const) : ([1] as const);
+        const info = ANATOMY_INFO[model.id] ?? {
+          nameLa: model.label,
+          category: model.layer === "muscles" ? "Kas" : "Organ",
+        };
         const label =
           related && showLabels && mode === "innervation" && geometry.boundingSphere ? (
             <Html
@@ -460,7 +643,22 @@ function SoftOrgans({
                       geometry={geometry}
                       material={bone}
                       renderOrder={41}
+                      userData={{ interactive: true, id: `${model.id}-${dir}` }}
                       onClick={(e) => handleOrganClick(e, model)}
+                      onPointerOver={(e) => {
+                        if (e.nativeEvent.buttons > 0) return;
+                        e.stopPropagation();
+                        setHoveredStructure({
+                          id: `${model.id}-${dir}`,
+                          nameLa: info.nameLa,
+                          nameTr: info.nameTr,
+                          category: info.category,
+                          point: [e.point.x, e.point.y, e.point.z],
+                        });
+                      }}
+                      onPointerOut={() => {
+                        setHoveredStructure((curr) => (curr?.id === `${model.id}-${dir}` ? null : curr));
+                      }}
                     />
                   </group>
                 );
@@ -471,10 +669,29 @@ function SoftOrgans({
                   <group key={dir} position={position} scale={scale}>
                     <mesh geometry={geometry} material={lungDepth} renderOrder={50} />
                     <mesh
+                      ref={(m) => {
+                        if (m) meshRefs.current.set(`${model.id}-${dir}`, m);
+                        else meshRefs.current.delete(`${model.id}-${dir}`);
+                      }}
                       geometry={geometry}
                       material={material}
                       renderOrder={51}
+                      userData={{ interactive: true, id: `${model.id}-${dir}` }}
                       onClick={(e) => handleOrganClick(e, model)}
+                      onPointerOver={(e) => {
+                        if (e.nativeEvent.buttons > 0) return;
+                        e.stopPropagation();
+                        setHoveredStructure({
+                          id: `${model.id}-${dir}`,
+                          nameLa: info.nameLa,
+                          nameTr: info.nameTr,
+                          category: info.category,
+                          point: [e.point.x, e.point.y, e.point.z],
+                        });
+                      }}
+                      onPointerOut={() => {
+                        setHoveredStructure((curr) => (curr?.id === `${model.id}-${dir}` ? null : curr));
+                      }}
                     />
                   </group>
                 );
@@ -483,18 +700,46 @@ function SoftOrgans({
               return (
                 <mesh
                   key={dir}
+                  ref={(m) => {
+                    if (m) meshRefs.current.set(`${model.id}-${dir}`, m);
+                    else meshRefs.current.delete(`${model.id}-${dir}`);
+                  }}
                   geometry={geometry}
                   material={material}
                   position={position}
                   scale={scale}
+                  userData={{ interactive: true, id: `${model.id}-${dir}` }}
                   onClick={(e) => handleOrganClick(e, model)}
+                  onPointerOver={(e) => {
+                    if (e.nativeEvent.buttons > 0) return;
+                    e.stopPropagation();
+                    setHoveredStructure({
+                      id: `${model.id}-${dir}`,
+                      nameLa: info.nameLa,
+                      nameTr: info.nameTr,
+                      category: info.category,
+                      point: [e.point.x, e.point.y, e.point.z],
+                    });
+                  }}
+                  onPointerOut={() => {
+                    setHoveredStructure((curr) => (curr?.id === `${model.id}-${dir}` ? null : curr));
+                  }}
                   onBeforeRender={
                     twitch
                       ? () => {
                           const state = useStudio.getState();
-                          const owned = eomModelForNerve(state.selectedId) === model.id;
-                          const shown = eyeSigns(state.side).includes(dir);
-                          twitch.value = owned && shown ? currentEyePose().twitch : 0;
+                          if (eomModelForNerve(state.selectedId) === model.id) {
+                            const shown = eyeSigns(state.side).includes(dir);
+                            twitch.value = shown ? currentEyePose().twitch : 0;
+                          } else {
+                            const act = calculateOrganActivation(
+                              model.id,
+                              state.selectedId,
+                              state.signalProgress,
+                              state.playing,
+                            );
+                            twitch.value = act * 0.75;
+                          }
                         }
                       : undefined
                   }
@@ -520,6 +765,7 @@ function Eye({ sign }: { sign: 1 | -1 }) {
   const lid = useRef<Group>(null);
   const pupil = useRef<Mesh>(null);
   const explode = useStudio((s) => s.explode);
+  const setHoveredStructure = useStudio((s) => s.setHoveredStructure);
   const [cx, cy, cz] = EYE.center;
   const r = EYE.radius;
   const shift = explode ? sign * EXPLODE_CM : 0;
@@ -541,7 +787,23 @@ function Eye({ sign }: { sign: 1 | -1 }) {
   return (
     <group position={[cx * sign + shift, cy, cz]} onClick={(e) => e.stopPropagation()}>
       <group ref={globe}>
-        <mesh>
+        <mesh
+          userData={{ interactive: true, id: `eye-${sign}` }}
+          onPointerOver={(e) => {
+            if (e.nativeEvent.buttons > 0) return;
+            e.stopPropagation();
+            setHoveredStructure({
+              id: `eye-${sign}`,
+              nameLa: "Bulbus oculi",
+              nameTr: "Göz küresi",
+              category: "Göz",
+              point: [e.point.x, e.point.y, e.point.z],
+            });
+          }}
+          onPointerOut={() => {
+            setHoveredStructure((curr) => (curr?.id === `eye-${sign}` ? null : curr));
+          }}
+        >
           <sphereGeometry args={[r, 48, 32]} />
           <meshPhysicalMaterial color="#f1ece4" roughness={0.35} clearcoat={0.6} clearcoatRoughness={0.2} />
         </mesh>
@@ -591,6 +853,7 @@ function CameraRig({ controls }: { controls: MutableRefObject<{ target: Vector3 
   const { camera, size } = useThree();
   const selectedId = useStudio((s) => s.selectedId);
   const mode = useStudio((s) => s.mode);
+  const focusTarget = useStudio((s) => s.focusTarget);
   const anim = useRef({
     from: new Vector3(),
     to: new Vector3(...DEFAULT_VIEW.position),
@@ -601,8 +864,9 @@ function CameraRig({ controls }: { controls: MutableRefObject<{ target: Vector3 
 
   useEffect(() => {
     const a = anim.current;
-    const view =
-      mode === "signal" && selectedId === 10
+    const view = focusTarget
+      ? focusTarget
+      : mode === "signal" && selectedId === 10
         ? VAGUS_SIGNAL_VIEW
         : selectedId !== null
           ? (NERVE_VIEWS[selectedId] ?? DEFAULT_VIEW)
@@ -615,7 +879,7 @@ function CameraRig({ controls }: { controls: MutableRefObject<{ target: Vector3 
     a.toT.set(...view.target);
     a.to.set(...view.position).sub(a.toT).multiplyScalar(k).add(a.toT);
     a.t = 0;
-  }, [selectedId, mode, camera, controls, size.width, size.height]);
+  }, [selectedId, mode, focusTarget, camera, controls, size.width, size.height]);
 
   useFrame((_, dt) => {
     const a = anim.current;
@@ -670,11 +934,119 @@ function BuildProgress() {
   );
 }
 
+function StructureHoverTooltip() {
+  const hovered = useStudio((s) => s.hoveredStructure);
+  const selectedId = useStudio((s) => s.selectedId);
+  const showLabels = useStudio((s) => s.showLabels);
+
+  if (!showLabels || !hovered) return null;
+  // If the hovered structure is the currently selected nerve main trunk, its pinned label is already shown
+  if (selectedId !== null && hovered.id === `nerve-${selectedId}-1-0`) return null;
+
+  const organInfo = getOrganInnervation(hovered.id);
+
+  return (
+    <Html
+      position={hovered.point}
+      center
+      distanceFactor={18}
+      occlude={false}
+      zIndexRange={[60, 0]}
+    >
+      <div className="pointer-events-none select-none flex flex-col gap-1 rounded-xl border border-gold/40 bg-surface/95 p-2.5 shadow-2xl backdrop-blur-md min-w-[210px] max-w-[290px]">
+        <div className="flex items-center justify-between gap-2 border-b border-border/70 pb-1">
+          <span className="latin text-sm font-semibold text-fg">{hovered.nameLa}</span>
+          {hovered.category && (
+            <span className="rounded bg-gold/20 px-1.5 py-0.5 font-sans text-[9px] font-bold tracking-wider text-gold uppercase">
+              {hovered.category}
+            </span>
+          )}
+        </div>
+        {hovered.nameTr && (
+          <p className="text-xs text-muted leading-tight">{hovered.nameTr}</p>
+        )}
+        {organInfo && (
+          <div className="mt-1 space-y-1 text-[11px] pt-1 border-t border-border/40">
+            <div className="flex items-center gap-1.5 font-sans font-medium text-gold">
+              <span className="size-1.5 rounded-full bg-gold animate-pulse shrink-0" />
+              <span className="truncate">
+                İnnervasyon: CN {nerveById(organInfo.primaryNerveId).roman} ({organInfo.branchNameLa})
+              </span>
+            </div>
+            <p className="text-[10px] text-fg/80 leading-snug">{organInfo.effectTr}</p>
+            <p className="text-[9px] text-gold/80 italic font-medium">Tıkla: Sinir yolunu ve etkileşimi odakla ➔</p>
+          </div>
+        )}
+      </div>
+    </Html>
+  );
+}
+
+function VagusCourseFollowBar() {
+  const selectedId = useStudio((s) => s.selectedId);
+  const activeWaypointId = useStudio((s) => s.activeWaypointId);
+  const setActiveWaypointId = useStudio((s) => s.setActiveWaypointId);
+  const setFocusTarget = useStudio((s) => s.setFocusTarget);
+  const setSignalProgress = useStudio((s) => s.setSignalProgress);
+  const setPlaying = useStudio((s) => s.setPlaying);
+
+  if (selectedId !== 10) return null;
+
+  return (
+    <div className="pointer-events-auto absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex max-w-[94vw] flex-col items-center gap-1.5 rounded-2xl border border-gold/40 bg-surface/90 px-3 py-2 shadow-2xl backdrop-blur-md">
+      <div className="flex items-center justify-between w-full gap-3 px-1 text-[11px]">
+        <span className="font-semibold text-gold tracking-wide uppercase flex items-center gap-1.5">
+          <span className="size-2 rounded-full bg-gold animate-ping" />
+          Vagus Seyrini Takip Et · Beyin Sapından Abdomene
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            setFocusTarget(null);
+            setActiveWaypointId(null);
+          }}
+          className="text-xs text-muted hover:text-fg underline cursor-pointer"
+        >
+          Genel Bakış
+        </button>
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-1">
+        {VAGUS_COURSE_WAYPOINTS.map((wp) => {
+          const isActive = activeWaypointId === wp.id;
+          return (
+            <button
+              key={wp.id}
+              type="button"
+              onClick={() => {
+                setActiveWaypointId(wp.id);
+                setFocusTarget(wp.camera);
+                setSignalProgress(wp.signalScrub);
+                setPlaying(true);
+              }}
+              className={cn(
+                "cursor-pointer rounded-lg px-2.5 py-1 text-xs transition-all duration-200",
+                isActive
+                  ? "bg-gold text-black font-semibold shadow-md"
+                  : "bg-surface-2/80 text-fg hover:bg-surface-2 hover:border-gold/30 border border-transparent",
+              )}
+            >
+              {wp.titleTr}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function AnatomyCanvas() {
   const controls = useRef<{ target: Vector3 } | null>(null);
 
   useEffect(() => {
-    const onPointerDown = (e: PointerEvent) => recordPointerDown(e);
+    const onPointerDown = (e: PointerEvent) => {
+      recordPointerDown(e);
+      useStudio.getState().setHoveredStructure(null);
+    };
     window.addEventListener("pointerdown", onPointerDown, { passive: true });
     return () => window.removeEventListener("pointerdown", onPointerDown);
   }, []);
@@ -686,7 +1058,10 @@ export function AnatomyCanvas() {
         dpr={[1, 2]}
         camera={{ position: DEFAULT_VIEW.position, fov: 32, near: 0.5, far: 400 }}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-        onPointerDown={(e) => recordPointerDown(e)}
+        onPointerDown={(e) => {
+          recordPointerDown(e);
+          useStudio.getState().setHoveredStructure(null);
+        }}
       >
         <Lights />
         <CameraRig controls={controls} />
@@ -696,6 +1071,7 @@ export function AnatomyCanvas() {
         <Ganglia />
         <NucleiDots />
         <NerveSystem />
+        <StructureHoverTooltip />
         <OrbitControls
           ref={controls as never}
           enableDamping
@@ -706,6 +1082,7 @@ export function AnatomyCanvas() {
         />
       </Canvas>
       <BuildProgress />
+      <VagusCourseFollowBar />
     </div>
   );
 }

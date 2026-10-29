@@ -32,6 +32,7 @@ import {
 } from "@/lib/anatomy-paths";
 import { useStudio } from "@/lib/studio-store";
 import { isDragOrbit } from "@/lib/gesture";
+import { getOrganInnervation } from "@/lib/organ-innervation";
 
 /** Lateral offset of each half in the split ("explode") view, cm. */
 export const EXPLODE_CM = 1.2;
@@ -140,6 +141,8 @@ export function Ganglia() {
   const hovered = useStudio((s) => s.hoveredId);
   const side = useStudio((s) => s.side);
   const explode = useStudio((s) => s.explode);
+  const setSelected = useStudio((s) => s.setSelected);
+  const setHoveredStructure = useStudio((s) => s.setHoveredStructure);
   const orient = useMemo(
     () => GANGLIA.map((g) => new Quaternion().setFromUnitVectors(X_AXIS, new Vector3(...g.axis).normalize())),
     [],
@@ -158,9 +161,29 @@ export function Ganglia() {
           return (
             <mesh
               key={`${g.label}-${dir}`}
+              userData={{ interactive: true, id: `ganglion-${g.label}-${dir}` }}
               position={[g.position[0] * dir + shift, g.position[1], g.position[2]]}
               quaternion={q}
               scale={g.radii}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isDragOrbit(e)) return;
+                setSelected(g.nerveId);
+              }}
+              onPointerOver={(e) => {
+                if (e.nativeEvent.buttons > 0) return;
+                e.stopPropagation();
+                setHoveredStructure({
+                  id: `ganglion-${g.label}-${dir}`,
+                  nameLa: g.label,
+                  nameTr: `${nerve.nameTr} ganglionu`,
+                  category: "Ganglion",
+                  point: [e.point.x, e.point.y, e.point.z],
+                });
+              }}
+              onPointerOut={() => {
+                setHoveredStructure((curr) => (curr?.id === `ganglion-${g.label}-${dir}` ? null : curr));
+              }}
             >
               <sphereGeometry args={[1, 24, 16]} />
               <meshStandardMaterial
@@ -182,6 +205,8 @@ export function Ganglia() {
 export function NucleiDots() {
   const visible = useStudio((s) => s.layers.nuclei);
   const selected = useStudio((s) => s.selectedId);
+  const setSelected = useStudio((s) => s.setSelected);
+  const setHoveredStructure = useStudio((s) => s.setHoveredStructure);
   if (!visible) return null;
   return (
     <group renderOrder={10}>
@@ -189,7 +214,31 @@ export function NucleiDots() {
         const active = selected === n.id;
         const color = vivid(nerveById(n.id).color);
         return ([-1, 1] as const).map((dir) => (
-          <mesh key={`${n.id}-${dir}`} position={[n.position[0] * dir, n.position[1], n.position[2]]} renderOrder={10}>
+          <mesh
+            key={`${n.id}-${dir}`}
+            userData={{ interactive: true, id: `nucleus-${n.id}-${dir}` }}
+            position={[n.position[0] * dir, n.position[1], n.position[2]]}
+            renderOrder={10}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isDragOrbit(e)) return;
+              setSelected(n.id);
+            }}
+            onPointerOver={(e) => {
+              if (e.nativeEvent.buttons > 0) return;
+              e.stopPropagation();
+              setHoveredStructure({
+                id: `nucleus-${n.id}-${dir}`,
+                nameLa: n.label,
+                nameTr: `${nerveById(n.id).nameTr} çekirdeği`,
+                category: "Çekirdek",
+                point: [e.point.x, e.point.y, e.point.z],
+              });
+            }}
+            onPointerOut={() => {
+              setHoveredStructure((curr) => (curr?.id === `nucleus-${n.id}-${dir}` ? null : curr));
+            }}
+          >
             <sphereGeometry args={[active ? 0.2 : 0.13, 16, 12]} />
             <meshBasicMaterial
               color={color}
@@ -225,6 +274,7 @@ function taperedTube(curve: CatmullRomCurve3, r0: number, r1: number, segments: 
 }
 
 type BuiltCourse = {
+  label: string;
   curve: CatmullRomCurve3;
   length: number;
   /** Distance on the signal clock at which this course starts, cm. */
@@ -266,6 +316,7 @@ function buildNerve(path: NervePath, dir: 1 | -1, shift: number) {
     const segments = Math.min(220, Math.max(24, Math.round(length * 7)));
     samples.push(curve.getSpacedPoints(80));
     courses.push({
+      label: course.label ?? nerveById(path.id).nameLa,
       curve,
       length,
       offset,
@@ -284,13 +335,17 @@ function NerveCourse({ path, dir }: { path: NervePath; dir: 1 | -1 }) {
   const color = vivid(nerve.color);
   const selected = useStudio((s) => s.selectedId);
   const hovered = useStudio((s) => s.hoveredId);
+  const hoveredStructure = useStudio((s) => s.hoveredStructure);
+  const hoveredOrgan = hoveredStructure ? getOrganInnervation(hoveredStructure.id) : null;
+  const organRelatesToNerve = hoveredOrgan ? hoveredOrgan.allNerveIds.includes(path.id) : false;
   const explode = useStudio((s) => s.explode);
   const showLabels = useStudio((s) => s.showLabels);
   const side = useStudio((s) => s.side);
   const isLabelSide = side === "left" ? dir === -1 : dir === 1;
   const setSelected = useStudio((s) => s.setSelected);
   const setHovered = useStudio((s) => s.setHovered);
-  const active = selected === path.id || hovered === path.id;
+  const setHoveredStructure = useStudio((s) => s.setHoveredStructure);
+  const active = selected === path.id || hovered === path.id || organRelatesToNerve;
   const dim = selected !== null && selected !== path.id;
   const signalling = selected === path.id;
 
@@ -357,6 +412,7 @@ function NerveCourse({ path, dir }: { path: NervePath; dir: 1 | -1 }) {
           <mesh
             geometry={c.hit}
             material={HIT_MATERIAL}
+            userData={{ interactive: true, id: `nerve-${path.id}-${dir}-${i}` }}
             onClick={(e) => {
               e.stopPropagation();
               if (isDragOrbit(e)) return;
@@ -365,12 +421,20 @@ function NerveCourse({ path, dir }: { path: NervePath; dir: 1 | -1 }) {
             onPointerOver={(e) => {
               // Ignore hover while mouse buttons are held down (user is orbiting/dragging)
               if (e.nativeEvent.buttons > 0) return;
-              // If another nerve is already selected, don't flash other nerves on accidental hover
-              if (selected !== null && selected !== path.id) return;
               e.stopPropagation();
               setHovered(path.id);
+              setHoveredStructure({
+                id: `nerve-${path.id}-${dir}-${i}`,
+                nameLa: c.label,
+                nameTr: c.label !== nerve.nameLa ? `${nerve.nameTr} · ${c.label}` : nerve.nameTr,
+                category: `CN ${nerve.roman}`,
+                point: [e.point.x, e.point.y, e.point.z],
+              });
             }}
-            onPointerOut={() => setHovered(null)}
+            onPointerOut={() => {
+              setHovered(null);
+              setHoveredStructure((curr) => (curr?.id === `nerve-${path.id}-${dir}-${i}` ? null : curr));
+            }}
           />
           {active && <mesh geometry={c.glow} material={glowMat} />}
           {signalling && pulseMats[i] && <mesh geometry={c.pulse} material={pulseMats[i]} />}
@@ -387,7 +451,7 @@ function NerveCourse({ path, dir }: { path: NervePath; dir: 1 | -1 }) {
           )}
         </group>
       ))}
-      {showLabels && active && isLabelSide && (
+      {showLabels && selected === path.id && isLabelSide && (
         <Html position={built.labelAt} center distanceFactor={18} occlude={false} zIndexRange={[5, 0]}>
           <div className="nerve-chip">
             CN {nerve.roman} <span style={{ fontStyle: "italic", textTransform: "none" }}>{nerve.nameLa}</span>

@@ -543,19 +543,52 @@ const RAW_PATHS: NervePath[] = [
         ],
       },
       {
-        // Cardiac branches to the plexus under the arch.
-        label: "Rr. cardiaci",
+        // Cardiac branches to the plexus extending over the heart (Plexus cardiacus).
+        label: "Rr. cardiaci (Plexus cardiacus)",
         points: [
           [2.8, -14.0, 1.7],
-          [1.9, -19.5, 2.4],
-          [0.6, -22.6, 2.4],
+          [2.1, -19.2, 2.4],
+          [0.8, -23.0, 2.8],
+          [1.2, -25.8, 3.8],
+          [2.2, -28.2, 5.0],
         ],
       },
       {
-        label: "Rr. pulmonales",
+        // Atrial branches of the cardiac plexus.
+        label: "Rr. cardiaci atriales",
+        points: [
+          [0.8, -23.0, 2.8],
+          [-0.2, -24.8, 3.4],
+          [-1.2, -26.0, 3.2],
+        ],
+      },
+      {
+        // Pulmonary branches entering the lung hilum (Plexus pulmonalis).
+        label: "Rr. pulmonales (Plexus pulmonalis)",
         points: [
           [2.5, -25.5, 0.7],
           [4.2, -26.5, 0.6],
+          [5.6, -27.2, 0.8],
+          [6.8, -28.0, 0.5],
+        ],
+      },
+      {
+        // Anterior gastric branches spreading across the stomach wall.
+        label: "Rr. gastrici anteriores",
+        points: [
+          [3.2, -41.8, 3.4],
+          [4.5, -43.2, 4.6],
+          [5.2, -44.8, 5.2],
+          [3.8, -46.0, 6.0],
+        ],
+      },
+      {
+        // Posterior & lesser curvature gastric branches.
+        label: "Rr. gastrici posteriores",
+        points: [
+          [3.2, -41.8, 3.4],
+          [2.2, -43.5, 4.2],
+          [0.8, -45.0, 5.8],
         ],
       },
     ],

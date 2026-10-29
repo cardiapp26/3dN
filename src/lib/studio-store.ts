@@ -5,9 +5,25 @@ export type ImagingPlane = "axial" | "coronal" | "sagittal";
 export type ImagingModality = "MR" | "CT";
 export type Side = "both" | "left" | "right";
 
+export type HoveredStructure = {
+  id: string;
+  nameLa: string;
+  nameTr?: string;
+  category?: string;
+  point: [number, number, number];
+};
+
+export type FocusTarget = {
+  position: [number, number, number];
+  target: [number, number, number];
+};
+
 type StudioState = {
   selectedId: number | null;
   hoveredId: number | null;
+  hoveredStructure: HoveredStructure | null;
+  focusTarget: FocusTarget | null;
+  activeWaypointId: string | null;
   mode: StudioMode;
   layers: Record<LayerId, boolean>;
   playing: boolean;
@@ -20,8 +36,13 @@ type StudioState = {
   imagingSlice: number;
   imagingModality: ImagingModality;
   imagingSequence: "T1" | "T2" | "FLAIR" | "bone";
+  setFocusTarget: (target: FocusTarget | null) => void;
+  setActiveWaypointId: (id: string | null) => void;
   setSelected: (id: number | null) => void;
   setHovered: (id: number | null) => void;
+  setHoveredStructure: (
+    h: HoveredStructure | null | ((prev: HoveredStructure | null) => HoveredStructure | null),
+  ) => void;
   setMode: (mode: StudioMode) => void;
   toggleLayer: (id: LayerId) => void;
   setPlaying: (v: boolean) => void;
@@ -49,6 +70,9 @@ const defaultLayers: Record<LayerId, boolean> = {
 export const useStudio = create<StudioState>((set) => ({
   selectedId: null,
   hoveredId: null,
+  hoveredStructure: null,
+  focusTarget: null,
+  activeWaypointId: null,
   mode: "explore",
   layers: defaultLayers,
   playing: false,
@@ -61,13 +85,21 @@ export const useStudio = create<StudioState>((set) => ({
   imagingSlice: 10,
   imagingModality: "MR",
   imagingSequence: "T1",
+  setFocusTarget: (focusTarget) => set({ focusTarget }),
+  setActiveWaypointId: (activeWaypointId) => set({ activeWaypointId }),
   setSelected: (id) =>
     set({
       selectedId: id,
+      focusTarget: null,
+      activeWaypointId: null,
       signalProgress: 0,
       playing: id !== null,
     }),
   setHovered: (id) => set({ hoveredId: id }),
+  setHoveredStructure: (h) =>
+    set((s) => ({
+      hoveredStructure: typeof h === "function" ? h(s.hoveredStructure) : h,
+    })),
   setMode: (mode) =>
     set((s) => ({
       mode,

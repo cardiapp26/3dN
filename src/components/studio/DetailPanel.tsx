@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import { CRANIAL_NERVES, TYPE_LABEL, ATLAS_PLATES, type AtlasPlate, nerveById } from "@/lib/cranial-nerves";
 import { eyeActionText } from "@/lib/eye-motion";
 import { useStudio } from "@/lib/studio-store";
+import {
+  ORGAN_INNERVATIONS,
+  VAGUS_COURSE_WAYPOINTS,
+  getOrganInnervation,
+} from "@/lib/organ-innervation";
+import { cn } from "@/lib/utils";
 import { AtlasLightbox } from "./AtlasLightbox";
 
 export function DetailPanel() {
@@ -17,6 +23,9 @@ export function DetailPanel() {
   const speed = useStudio((s) => s.signalSpeed);
   const setSpeed = useStudio((s) => s.setSignalSpeed);
   const setSelected = useStudio((s) => s.setSelected);
+  const setFocusTarget = useStudio((s) => s.setFocusTarget);
+  const activeWaypointId = useStudio((s) => s.activeWaypointId);
+  const setActiveWaypointId = useStudio((s) => s.setActiveWaypointId);
 
   if (selectedId === null) {
     return (
@@ -118,17 +127,87 @@ export function DetailPanel() {
         </ul>
       </Section>
 
+      {n.id === 10 && (
+        <Section title="Cursus & Innervatio" caption="Vagus Yolculuğu">
+          <p className="text-xs text-muted mb-2">
+            Vagus sinirini beyin sapından toraks ve abdomene doğru takip edin. Her seviyede hedef organlarla etkileşimini gözlemleyin:
+          </p>
+          <div className="space-y-1.5">
+            {VAGUS_COURSE_WAYPOINTS.map((wp) => {
+              const isActive = activeWaypointId === wp.id;
+              return (
+                <button
+                  key={wp.id}
+                  type="button"
+                  onClick={() => {
+                    const s = useStudio.getState();
+                    if (!s.layers.organs) s.toggleLayer("organs");
+                    setActiveWaypointId(wp.id);
+                    setFocusTarget(wp.camera);
+                    setProgress(wp.signalScrub);
+                    setPlaying(true);
+                  }}
+                  className={cn(
+                    "w-full text-left rounded-lg p-2.5 transition-all border text-xs cursor-pointer",
+                    isActive
+                      ? "border-gold bg-gold/10 text-fg shadow-sm"
+                      : "border-border bg-surface hover:border-gold/40 hover:bg-surface-2",
+                  )}
+                >
+                  <div className="flex items-center justify-between font-semibold">
+                    <span className={isActive ? "text-gold" : "text-fg"}>{wp.titleTr}</span>
+                    <span className="text-[10px] text-muted font-normal italic">{wp.subtitleLa}</span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-muted leading-relaxed">{wp.descriptionTr}</p>
+                </button>
+              );
+            })}
+          </div>
+        </Section>
+      )}
+
       <Section title="Innervatio" caption="İnnervasyon">
         <ul className="divide-y divide-border">
-          {n.targets.map((t) => (
-            <li key={t.id} className="flex items-baseline justify-between gap-3 py-1.5">
-              <span className="min-w-0">
-                <span className="latin text-base text-fg">{t.nameLa}</span>
-                {t.nameTr !== t.nameLa && <span className="ml-2 text-xs text-subtle">{t.nameTr}</span>}
-              </span>
-              <span className="eyebrow shrink-0 tracking-[0.14em]">{kindLabel(t.kind)}</span>
-            </li>
-          ))}
+          {n.targets.map((t) => {
+            const organ = getOrganInnervation(t.id);
+            return (
+              <li key={t.id} className="py-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (organ) {
+                      const s = useStudio.getState();
+                      if (t.kind === "muscle" && !s.layers.muscles) s.toggleLayer("muscles");
+                      if ((t.kind === "organ" || t.kind === "gland") && !s.layers.organs) s.toggleLayer("organs");
+                      setFocusTarget(organ.cameraFocus);
+                      setProgress(organ.signalArrival.start);
+                      setPlaying(true);
+                    }
+                  }}
+                  className={cn(
+                    "w-full text-left rounded-md p-1.5 transition-colors group",
+                    organ ? "hover:bg-surface-2 cursor-pointer" : "",
+                  )}
+                >
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="min-w-0">
+                      <span className="latin text-base text-fg group-hover:text-gold transition-colors">
+                        {t.nameLa}
+                      </span>
+                      {t.nameTr !== t.nameLa && <span className="ml-2 text-xs text-subtle">{t.nameTr}</span>}
+                    </span>
+                    <span className="eyebrow shrink-0 tracking-[0.14em]">{kindLabel(t.kind)}</span>
+                  </div>
+                  {organ && (
+                    <div className="mt-1 text-[11px] text-muted group-hover:text-fg/80">
+                      <span className="font-medium text-gold/90">{organ.branchNameTr}: </span>
+                      {organ.effectTr}
+                    </div>
+                  )}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </Section>
 
